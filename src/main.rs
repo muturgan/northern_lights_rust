@@ -5,13 +5,10 @@ mod config;
 use ::std::collections::HashMap;
 use ::std::sync::Arc;
 use axum::{
-	extract::Path,
-	http::StatusCode,
-	response::{Html, IntoResponse},
-	routing::get,
-	Json, Router, Server,
+	extract::Path, http::StatusCode, response::IntoResponse, routing::get, Json, Router, Server,
 };
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use tower_http::services::{ServeDir, ServeFile};
 
 const MESSAGE: &str = "Simple CRUD API with Rust, SQLX, Postgres,and Axum";
 
@@ -29,9 +26,9 @@ async fn health_checker_handler() -> impl IntoResponse {
 	return Json(json_response);
 }
 
-async fn index_handler(Path(params): Path<HashMap<String, String>>) -> impl IntoResponse {
+pub async fn index_handler(Path(params): Path<HashMap<String, String>>) -> impl IntoResponse {
 	println!("params: {:?}", params);
-	return Html("<p>Hello, World!</p>");
+	return "<p>Hello, World!</p>";
 }
 
 async fn favicon_handler() -> impl IntoResponse {
@@ -63,8 +60,9 @@ async fn main() {
 	let app = Router::new()
 		.route("/api/healthchecker", get(health_checker_handler))
 		.route("/favicon.ico", get(favicon_handler))
-		.route("/static", get(index_handler))
-		.route("/static/*file", get(index_handler))
+		.nest_service("/promo", ServeFile::new("static/promo.html"))
+		.nest_service("/check", ServeFile::new("static/check.html"))
+		.nest_service("/static", ServeDir::new("static"))
 		.with_state(app_state);
 
 	let binded = Server::bind(&config::get_http_host_to_serve());
