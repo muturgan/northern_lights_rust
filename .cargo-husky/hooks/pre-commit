@@ -1,5 +1,2 @@
 #!/bin/sh
-cargo clippy --all --all-features --tests -- -D warnings;
-echo "clippy is ok";
-cargo fmt -- --check;
-echo "fmt is ok";
+sh scripts.sh lint
