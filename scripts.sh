@@ -1,5 +1,11 @@
+#!/bin/sh
+
 build() {
-	cargo build;
+	cargo build --release;
+}
+
+dev() {
+	export $(cat .env | xargs) && cargo run
 }
 
 clippy() {

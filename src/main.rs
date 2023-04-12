@@ -1,11 +1,73 @@
-use axum::{routing::get, Router};
+#![allow(clippy::needless_return)]
+
+mod config;
+
+use ::std::collections::HashMap;
+use ::std::sync::Arc;
+use axum::{
+	extract::Path,
+	http::StatusCode,
+	response::{Html, IntoResponse},
+	routing::get,
+	Json, Router, Server,
+};
+use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+
+const MESSAGE: &str = "Simple CRUD API with Rust, SQLX, Postgres,and Axum";
+
+// registration
+// check
+// activate
+// users
+
+async fn health_checker_handler() -> impl IntoResponse {
+	let json_response = serde_json::json!({
+		"status": "success",
+		"message": MESSAGE
+	});
+
+	return Json(json_response);
+}
+
+async fn index_handler(Path(params): Path<HashMap<String, String>>) -> impl IntoResponse {
+	println!("params: {:?}", params);
+	return Html("<p>Hello, World!</p>");
+}
+
+async fn favicon_handler() -> impl IntoResponse {
+	return StatusCode::NO_CONTENT;
+}
+
+pub struct AppState {
+	pub db: Pool<Postgres>,
+}
 
 #[tokio::main]
 async fn main() {
-	let app = Router::new().route("/", get(|| async { "Hello, world!" }));
-
-	axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
-		.serve(app.into_make_service())
+	let database_url = config::get_db_config();
+	let pool = PgPoolOptions::new()
+		.max_connections(config::get_db_max_pool_size())
+		.connect(&database_url)
 		.await
-		.unwrap();
+		.expect(":( Failed to connect to the database");
+	println!(":) Connection to the database is successful");
+
+	sqlx::migrate!("./migrations")
+		.run(&pool)
+		.await
+		.expect(":( Migrations failed");
+	println!(":) Migrations finished");
+
+	let app_state = Arc::new(AppState { db: pool });
+
+	let app = Router::new()
+		.route("/api/healthchecker", get(health_checker_handler))
+		.route("/favicon.ico", get(favicon_handler))
+		.route("/static", get(index_handler))
+		.route("/static/*file", get(index_handler))
+		.with_state(app_state);
+
+	let binded = Server::bind(&config::get_http_host_to_serve());
+	println!(":) Server started successfully");
+	binded.serve(app.into_make_service()).await.unwrap();
 }
