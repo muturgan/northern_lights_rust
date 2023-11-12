@@ -1,13 +1,7 @@
-use ::std::sync::Arc;
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
-
 use crate::config;
+use sqlx::{postgres::PgPoolOptions, PgPool};
 
-pub struct AppState {
-	pub db: Pool<Postgres>,
-}
-
-pub async fn create_db_connection() -> Arc<AppState> {
+pub async fn create_db_connection() -> PgPool {
 	let database_url = config::get_db_config();
 	let pool = PgPoolOptions::new()
 		.max_connections(config::get_db_max_pool_size())
@@ -22,6 +16,5 @@ pub async fn create_db_connection() -> Arc<AppState> {
 		.expect(":( Migrations failed");
 	println!(":) Migrations finished");
 
-	let app_state = Arc::new(AppState { db: pool });
-	return app_state;
+	return pool;
 }

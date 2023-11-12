@@ -4,7 +4,7 @@ CREATE TABLE "users" (
 	"birthdate"  DATE NOT NULL,
 	"phone"      CHAR(12) NOT NULL,
 	"email"      VARCHAR(32) DEFAULT NULL,
-	"created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	"created_at" TIMESTAMPTZ(3) DEFAULT CURRENT_TIMESTAMP,
 
 	CONSTRAINT "UQ_users:phone" UNIQUE ("phone"),
 	CONSTRAINT "UQ_users:email" UNIQUE ("email"),

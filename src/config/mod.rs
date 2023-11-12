@@ -1,5 +1,8 @@
-use ::std::env::var as readEnvVar;
+use ::std::env::{current_dir, var as readEnvVar};
+use ::std::fs::File;
+use ::std::io::{prelude::*, BufReader};
 use ::std::net::SocketAddr;
+use ::std::path::Path;
 
 pub fn get_http_host_to_serve() -> SocketAddr {
 	let app_host = readEnvVar("APP_HOST").expect("APP_HOST environment variable is not defined");
@@ -44,4 +47,20 @@ pub fn get_db_max_pool_size() -> u32 {
 			.parse::<u8>()
 			.expect("DB_MAX_POOL_SIZE is not a correct u8"),
 	);
+}
+
+pub fn get_bips() -> Vec<String> {
+	let cwd = current_dir().unwrap();
+	let cwd = cwd.to_str().unwrap();
+	let bips_path = Path::new(cwd).join("bip39_russian.txt");
+
+	let mut bips = Vec::new();
+
+	let file = File::open(bips_path).unwrap();
+	let reader = BufReader::new(file);
+	for line in reader.lines() {
+		bips.push(line.unwrap());
+	}
+
+	return bips;
 }
