@@ -60,7 +60,7 @@ pub async fn users(Extension(pool): Extension<PgPool>) -> impl IntoResponse {
 
 fn generate_promo_from_bips() -> String {
 	let mut promocode = generate_bip();
-	promocode.push_str("-");
+	promocode.push('-');
 	let postfix = generate_postfix();
 	promocode.push_str(&postfix);
 	return promocode;

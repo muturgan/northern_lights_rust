@@ -1,3 +1,4 @@
+#![allow(clippy::upper_case_acronyms)]
 use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
 
 #[allow(non_camel_case_types)]
@@ -23,7 +24,7 @@ impl<'de> Deserialize<'de> for EScenarioStatus {
 					1 => Ok(EScenarioStatus::UNAUTHORIZED),
 					2 => Ok(EScenarioStatus::SCENARIO_FAIL),
 					3 => Ok(EScenarioStatus::SYSTEM_ERROR),
-					_ => Err(String::from("incorrect scenario status")).map_err(D::Error::custom),
+					_ => Err(D::Error::custom(String::from("incorrect scenario status"))),
 				};
 			}
 		};
