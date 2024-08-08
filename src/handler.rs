@@ -27,7 +27,7 @@ pub async fn registration(
 		"INSERT INTO users (firstname,birthdate,phone) VALUES ($1, $2, $3) RETURNING id",
 	)
 	.bind(body.firstName)
-	.bind(NaiveDate::parse_from_str(&body.birthDate, "%Y-%m-%d").unwrap())
+	.bind(NaiveDate::parse_from_str(&body.birth_date, "%Y-%m-%d").unwrap())
 	.bind(body.phone)
 	.fetch_one(&pool)
 	.await

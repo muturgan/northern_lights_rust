@@ -1,5 +1,6 @@
 use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
 
+#[allow(non_camel_case_types)]
 #[derive(Debug)]
 pub enum EScenarioStatus {
 	SCENARIO_SUCCESS,
