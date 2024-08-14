@@ -34,10 +34,11 @@ pub async fn registration(
 
 	let inserted_user = match query_result {
 		Err(err) => {
-			if err.to_string().contains("duplicate key") {
+			let err_str = err.to_string();
+			if err_str.contains("duplicate key") {
 				return ApiResponse::user_already_exists(body.phone);
 			} else {
-				return ApiResponse::system_error(err.to_string(), None);
+				return ApiResponse::system_error(err_str, None);
 			}
 		}
 		Ok(u) => u,
