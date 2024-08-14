@@ -96,7 +96,6 @@ fn generate_bip() -> String {
 
 fn generate_postfix() -> String {
 	let random_int = rand::thread_rng().gen_range(MIN_POSTFIX_VALUE..MAX_POSTFIX_VALUE);
-	println!("random_int: {random_int}");
 	return random_int
 		.to_string()
 		.pad(MAX_POSTFIX_LENGTH, '0', Alignment::Right, true);
