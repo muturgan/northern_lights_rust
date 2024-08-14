@@ -23,35 +23,57 @@ pub async fn registration(
 ) -> ApiResponse {
 	println!("body #1: {:?}", body);
 
-	let inserted_user = sqlx::query_as::<_, InsertedUser>(
+	let query_result = sqlx::query_as::<_, InsertedUser>(
 		"INSERT INTO users (firstname,birthdate,phone) VALUES ($1, $2, $3) RETURNING id",
 	)
 	.bind(body.firstName)
 	.bind(NaiveDate::parse_from_str(&body.birth_date, "%Y-%m-%d").unwrap())
-	.bind(body.phone)
+	.bind(&body.phone)
 	.fetch_one(&pool)
-	.await
-	.unwrap();
+	.await;
+
+	let inserted_user = match query_result {
+		Err(err) => {
+			if err.to_string().contains("duplicate key") {
+				return ApiResponse::user_already_exists(body.phone);
+			} else {
+				return ApiResponse::system_error(err.to_string(), None);
+			}
+		}
+		Ok(u) => u,
+	};
 
 	let promocode = generate_promo_from_bips();
 
-	let inserted_promo = sqlx::query_as::<_, InsertedPromo>(
+	let query_result = sqlx::query_as::<_, InsertedPromo>(
 		"INSERT INTO promo (promocode,holder_id) VALUES ($1, $2) RETURNING promocode",
 	)
 	.bind(promocode)
 	.bind(inserted_user.id)
 	.fetch_one(&pool)
-	.await
-	.unwrap();
+	.await;
+
+	let inserted_promo = match query_result {
+		Err(err) => {
+			return ApiResponse::system_error(err.to_string(), None);
+		}
+		Ok(p) => p,
+	};
 
 	return ApiResponse::user_registered(inserted_promo.promocode);
 }
 
 pub async fn users(Extension(pool): Extension<PgPool>) -> ApiResponse {
-	let users = sqlx::query_as::<_, User>("SELECT * FROM users")
+	let query_result = sqlx::query_as::<_, User>("SELECT * FROM users")
 		.fetch_all(&pool)
-		.await
-		.unwrap();
+		.await;
+
+	let users = match query_result {
+		Err(err) => {
+			return ApiResponse::system_error(err.to_string(), None);
+		}
+		Ok(u) => u,
+	};
 
 	return ApiResponse::user_list(users);
 }
