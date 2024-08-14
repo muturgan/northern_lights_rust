@@ -21,8 +21,6 @@ pub async fn registration(
 	Extension(pool): Extension<PgPool>,
 	Json(body): Json<RegistrationDto>,
 ) -> ApiResponse {
-	println!("body #1: {:?}", body);
-
 	let query_result = sqlx::query_as::<_, InsertedUser>(
 		"INSERT INTO users (firstname,birthdate,phone) VALUES ($1, $2, $3) RETURNING id",
 	)
