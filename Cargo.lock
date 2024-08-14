@@ -1450,7 +1450,6 @@ dependencies = [
  "axum",
  "cargo-husky",
  "chrono",
- "hyper",
  "pad",
  "rand",
  "serde",

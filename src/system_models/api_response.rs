@@ -1,10 +1,11 @@
 use crate::models;
 use crate::system_models::scenario_status::EScenarioStatus;
 use axum::{
+	http::StatusCode,
 	response::{IntoResponse, Response},
 	Json,
 };
-use hyper::StatusCode;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
