@@ -22,11 +22,6 @@ pub struct Promo {
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
-pub struct InsertedUser {
-	pub id: i32,
-}
-
-#[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct InsertedPromo {
 	pub promocode: String,
 }

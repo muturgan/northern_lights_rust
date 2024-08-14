@@ -5,6 +5,7 @@ mod db;
 mod dto;
 mod handler;
 mod models;
+mod repo;
 mod router;
 mod system_models;
 
