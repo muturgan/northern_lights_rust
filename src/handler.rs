@@ -20,7 +20,7 @@ pub async fn favicon_handler() -> impl IntoResponse {
 pub async fn registration(
 	Extension(pool): Extension<PgPool>,
 	Json(body): Json<RegistrationDto>,
-) -> impl IntoResponse {
+) -> ApiResponse {
 	println!("body #1: {:?}", body);
 
 	let inserted_user = sqlx::query_as::<_, InsertedUser>(
@@ -44,18 +44,16 @@ pub async fn registration(
 	.await
 	.unwrap();
 
-	return Json(ApiResponse::user_registered(inserted_promo.promocode));
+	return ApiResponse::user_registered(inserted_promo.promocode);
 }
 
-pub async fn users(Extension(pool): Extension<PgPool>) -> impl IntoResponse {
+pub async fn users(Extension(pool): Extension<PgPool>) -> ApiResponse {
 	let users = sqlx::query_as::<_, User>("SELECT * FROM users")
 		.fetch_all(&pool)
 		.await
 		.unwrap();
 
-	let json_response = serde_json::json!(ApiResponse::user_list(users));
-
-	return Json(json_response);
+	return ApiResponse::user_list(users);
 }
 
 fn generate_promo_from_bips() -> String {

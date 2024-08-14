@@ -1,5 +1,10 @@
 use crate::models;
 use crate::system_models::scenario_status::EScenarioStatus;
+use axum::{
+	response::{IntoResponse, Response},
+	Json,
+};
+use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -80,5 +85,11 @@ impl ApiResponse {
 
 	pub fn promo_already_activated() -> Self {
 		return Self::scenario_fail(String::from("Данный промокод уже был активирован"), None);
+	}
+}
+
+impl IntoResponse for ApiResponse {
+	fn into_response(self) -> Response {
+		(StatusCode::OK, Json(self)).into_response()
 	}
 }
