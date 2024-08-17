@@ -1,2 +1,2 @@
 #!/bin/sh
-cargo build
+cargo check
