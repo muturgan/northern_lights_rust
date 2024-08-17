@@ -1,3 +1,6 @@
+mod mock;
+mod postgres;
+
 use chrono::NaiveDate;
 use sqlx::PgPool;
 
@@ -6,6 +9,18 @@ use crate::models::{InsertedPromo, User};
 pub enum RepoError {
 	AlreadyExists(String),
 	Fail(String),
+}
+
+pub trait Repo {
+	async fn insert_user_and_grant_promo(
+		&self,
+		first_name: String,
+		birth_date: NaiveDate,
+		phone: String,
+		promocode: String,
+	) -> Result<InsertedPromo, RepoError>;
+
+	async fn read_users(&self) -> Result<Vec<User>, sqlx::Error>;
 }
 
 pub async fn insert_user_and_grant_promo(

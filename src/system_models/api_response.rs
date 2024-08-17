@@ -24,6 +24,11 @@ impl ApiResponse {
 		};
 	}
 
+	/// everything is ok
+	/// ```
+	/// let result = ApiResponse::scenario_success(String::from("everything is ok"), None);
+	/// # assert_eq!(result.status, EScenarioStatus::SCENARIO_SUCCESS);
+	/// ```
 	fn scenario_success(result: String, payload: Option<serde_json::Value>) -> Self {
 		return Self::new(EScenarioStatus::SCENARIO_SUCCESS, result, payload);
 	}

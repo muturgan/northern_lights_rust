@@ -17,6 +17,10 @@ start() {
 	start_release;
 }
 
+test() {
+	cargo test
+}
+
 clippy() {
 	cargo clippy --all --all-features --tests -- -D warnings;
 	echo "clippy is ok";
