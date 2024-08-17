@@ -1,3 +1,5 @@
+#![allow(clippy::needless_return)]
+
 use promo_codes;
 
 #[tokio::main]
