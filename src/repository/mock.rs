@@ -5,6 +5,7 @@ use std::cell::RefCell;
 
 const STORE: RefCell<Vec<MockUser>> = RefCell::new(Vec::new());
 
+#[derive(Clone)]
 struct MockUser {
 	id: u32,
 	firstname: String,
