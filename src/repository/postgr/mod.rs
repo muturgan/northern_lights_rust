@@ -1,19 +1,23 @@
-use super::{Repo, RepoError};
+mod db;
+
+use super::{RepoError, Store};
 use crate::models::{InsertedPromo, User};
 use chrono::NaiveDate;
 use sqlx::PgPool;
 
+#[derive(Clone)]
 pub struct PostgresStore {
 	pool: PgPool,
 }
 
 impl PostgresStore {
-	pub fn new(pool: PgPool) -> Self {
+	pub async fn new() -> Self {
+		let pool = db::create_db_connection().await;
 		Self { pool }
 	}
 }
 
-impl Repo for PostgresStore {
+impl Store for PostgresStore {
 	async fn insert_user_and_grant_promo(
 		&self,
 		first_name: String,

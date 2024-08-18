@@ -2,11 +2,10 @@ use axum::{http::StatusCode, response::IntoResponse, Extension, Json};
 use chrono::NaiveDate;
 use pad::{Alignment, PadStr};
 use rand::Rng;
-use sqlx::PgPool;
 
 use crate::config;
 use crate::dto::RegistrationDto;
-use crate::repo;
+use crate::repository::{RepoError, Repository};
 use crate::system_models::api_response::ApiResponse;
 
 const MIN_POSTFIX_VALUE: usize = 1;
@@ -18,28 +17,28 @@ pub async fn favicon_handler() -> impl IntoResponse {
 }
 
 pub async fn registration(
-	Extension(pool): Extension<PgPool>,
+	Extension(repo): Extension<Repository>,
 	Json(body): Json<RegistrationDto>,
 ) -> ApiResponse {
 	let birth_date = NaiveDate::parse_from_str(&body.birth_date, "%Y-%m-%d").unwrap();
 
 	let promocode = generate_promo_from_bips();
 
-	let query_result =
-		repo::insert_user_and_grant_promo(&pool, body.firstName, birth_date, body.phone, promocode)
-			.await;
+	let query_result = repo
+		.insert_user_and_grant_promo(body.firstName, birth_date, body.phone, promocode)
+		.await;
 
 	return match query_result {
 		Err(err) => match err {
-			repo::RepoError::AlreadyExists(phone) => ApiResponse::user_already_exists(phone),
-			repo::RepoError::Fail(err_message) => ApiResponse::system_error(err_message, None),
+			RepoError::AlreadyExists(phone) => ApiResponse::user_already_exists(phone),
+			RepoError::Fail(err_message) => ApiResponse::system_error(err_message, None),
 		},
 		Ok(p) => ApiResponse::user_registered(p.promocode),
 	};
 }
 
-pub async fn users(Extension(pool): Extension<PgPool>) -> ApiResponse {
-	return match repo::read_users(&pool).await {
+pub async fn users(Extension(repo): Extension<Repository>) -> ApiResponse {
+	return match repo.read_users().await {
 		Err(err) => ApiResponse::system_error(err.to_string(), None),
 		Ok(users) => ApiResponse::user_list(users),
 	};

@@ -1,13 +1,13 @@
 #![allow(clippy::needless_return)]
 
 use promo_codes::config;
-use promo_codes::db;
+use promo_codes::repository::Repository;
 use promo_codes::router;
 
 #[tokio::main]
 async fn main() {
-	let app_state = db::create_db_connection().await;
-	let app = router::create_router(app_state);
+	let repo = Repository::new().await;
+	let app = router::create_router(repo);
 
 	async fn shutdown_signal() {
 		let ctrl_c = async {

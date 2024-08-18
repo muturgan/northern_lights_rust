@@ -1,4 +1,4 @@
-use super::{Repo, RepoError};
+use super::{RepoError, Store};
 use crate::models::{InsertedPromo, User};
 use chrono::{DateTime, NaiveDate, Utc};
 use std::cell::RefCell;
@@ -28,6 +28,7 @@ impl MockUser {
 	}
 }
 
+#[derive(Clone)]
 pub struct MockStore {}
 
 impl MockStore {
@@ -36,7 +37,7 @@ impl MockStore {
 	}
 }
 
-impl Repo for MockStore {
+impl Store for MockStore {
 	async fn insert_user_and_grant_promo(
 		&self,
 		firstname: String,
