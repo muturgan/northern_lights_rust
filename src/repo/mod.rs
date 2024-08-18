@@ -11,6 +11,11 @@ pub enum RepoError {
 	Fail(String),
 }
 
+enum StoreKind {
+	Mock(mock::MockStore),
+	Postgres(postgres::PostgresStore),
+}
+
 pub trait Repo {
 	async fn insert_user_and_grant_promo(
 		&self,

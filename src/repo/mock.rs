@@ -3,6 +3,8 @@ use crate::models::{InsertedPromo, User};
 use chrono::{DateTime, NaiveDate, Utc};
 use std::cell::RefCell;
 
+const STORE: RefCell<Vec<MockUser>> = RefCell::new(Vec::new());
+
 struct MockUser {
 	id: u32,
 	firstname: String,
@@ -26,15 +28,11 @@ impl MockUser {
 	}
 }
 
-pub struct MockStore {
-	store: RefCell<Vec<MockUser>>,
-}
+pub struct MockStore {}
 
 impl MockStore {
 	pub fn new() -> Self {
-		Self {
-			store: RefCell::new(Vec::new()),
-		}
+		Self {}
 	}
 }
 
@@ -47,7 +45,7 @@ impl Repo for MockStore {
 		promocode: String,
 	) -> Result<InsertedPromo, RepoError> {
 		let new_user = MockUser {
-			id: self.store.borrow().len() as u32,
+			id: STORE.borrow().len() as u32,
 			firstname,
 			birthdate,
 			phone: phone,
@@ -58,7 +56,7 @@ impl Repo for MockStore {
 
 		let inserted_promo = new_user.promocode.clone();
 
-		self.store.borrow_mut().push(new_user);
+		STORE.borrow_mut().push(new_user);
 
 		return Ok(InsertedPromo {
 			promocode: inserted_promo,
@@ -66,12 +64,7 @@ impl Repo for MockStore {
 	}
 
 	async fn read_users(&self) -> Result<Vec<User>, sqlx::Error> {
-		return Ok(self
-			.store
-			.borrow()
-			.iter()
-			.map(|user| user.to_user())
-			.collect());
+		return Ok(STORE.borrow().iter().map(|user| user.to_user()).collect());
 	}
 }
 

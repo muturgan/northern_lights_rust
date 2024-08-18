@@ -3,17 +3,17 @@ use crate::models::{InsertedPromo, User};
 use chrono::NaiveDate;
 use sqlx::PgPool;
 
-pub struct PostgresStore<'a> {
-	pool: &'a PgPool,
+pub struct PostgresStore {
+	pool: PgPool,
 }
 
-impl<'a> PostgresStore<'a> {
-	pub fn new(pool: &'a PgPool) -> Self {
+impl PostgresStore {
+	pub fn new(pool: PgPool) -> Self {
 		Self { pool }
 	}
 }
 
-impl<'a> Repo for PostgresStore<'a> {
+impl Repo for PostgresStore {
 	async fn insert_user_and_grant_promo(
 		&self,
 		first_name: String,
@@ -33,7 +33,7 @@ impl<'a> Repo for PostgresStore<'a> {
 		.bind(birth_date)
 		.bind(&phone)
 		.bind(promocode)
-		.fetch_one(self.pool)
+		.fetch_one(&self.pool)
 		.await;
 
 		return match query_result {
@@ -51,7 +51,7 @@ impl<'a> Repo for PostgresStore<'a> {
 
 	async fn read_users(&self) -> Result<Vec<User>, sqlx::Error> {
 		return sqlx::query_as::<_, User>("SELECT * FROM users")
-			.fetch_all(self.pool)
+			.fetch_all(&self.pool)
 			.await;
 	}
 }
