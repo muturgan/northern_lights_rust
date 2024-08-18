@@ -26,11 +26,11 @@ impl MockUser {
 	}
 }
 
-struct MockRepo {
+struct MockStore {
 	store: RefCell<Vec<MockUser>>,
 }
 
-impl MockRepo {
+impl MockStore {
 	fn new() -> Self {
 		Self {
 			store: RefCell::new(Vec::new()),
@@ -38,7 +38,7 @@ impl MockRepo {
 	}
 }
 
-impl Repo for MockRepo {
+impl Repo for MockStore {
 	async fn insert_user_and_grant_promo(
 		&self,
 		firstname: String,
@@ -46,9 +46,6 @@ impl Repo for MockRepo {
 		phone: String,
 		promocode: String,
 	) -> Result<InsertedPromo, RepoError> {
-		let mut xs = vec![1i32, 2, 3];
-		xs.push(2);
-
 		let new_user = MockUser {
 			id: self.store.borrow().len() as u32,
 			firstname,

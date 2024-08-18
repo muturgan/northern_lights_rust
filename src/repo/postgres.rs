@@ -3,17 +3,17 @@ use crate::models::{InsertedPromo, User};
 use chrono::NaiveDate;
 use sqlx::PgPool;
 
-struct PostgresRepo<'a> {
+struct PostgresStore<'a> {
 	pool: &'a PgPool,
 }
 
-impl<'a> PostgresRepo<'a> {
+impl<'a> PostgresStore<'a> {
 	fn new(pool: &'a PgPool) -> Self {
 		Self { pool }
 	}
 }
 
-impl<'a> Repo for PostgresRepo<'a> {
+impl<'a> Repo for PostgresStore<'a> {
 	async fn insert_user_and_grant_promo(
 		&self,
 		first_name: String,
