@@ -3,7 +3,7 @@ use crate::models::{InsertedPromo, User};
 use chrono::NaiveDate;
 use sqlx::PgPool;
 
-struct PostgresStore<'a> {
+pub struct PostgresStore<'a> {
 	pool: &'a PgPool,
 }
 

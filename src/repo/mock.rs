@@ -26,7 +26,7 @@ impl MockUser {
 	}
 }
 
-struct MockStore {
+pub struct MockStore {
 	store: RefCell<Vec<MockUser>>,
 }
 
