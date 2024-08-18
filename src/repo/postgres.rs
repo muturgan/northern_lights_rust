@@ -8,7 +8,7 @@ pub struct PostgresStore<'a> {
 }
 
 impl<'a> PostgresStore<'a> {
-	fn new(pool: &'a PgPool) -> Self {
+	pub fn new(pool: &'a PgPool) -> Self {
 		Self { pool }
 	}
 }

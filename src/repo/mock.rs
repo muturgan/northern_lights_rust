@@ -31,7 +31,7 @@ pub struct MockStore {
 }
 
 impl MockStore {
-	fn new() -> Self {
+	pub fn new() -> Self {
 		Self {
 			store: RefCell::new(Vec::new()),
 		}
