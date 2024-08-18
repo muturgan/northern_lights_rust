@@ -1,6 +1,7 @@
 #![allow(clippy::needless_return)]
 
 use promo_codes::config;
+use promo_codes::graceful_shutdown::shutdown_signal;
 use promo_codes::repository::Repository;
 use promo_codes::router;
 
@@ -8,30 +9,6 @@ use promo_codes::router;
 async fn main() {
 	let repo = Repository::new().await;
 	let app = router::create_router(repo);
-
-	async fn shutdown_signal() {
-		let ctrl_c = async {
-			tokio::signal::ctrl_c()
-				.await
-				.expect("failed to install Ctrl+C handler");
-		};
-
-		#[cfg(unix)]
-		let terminate = async {
-			tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
-				.expect("failed to install signal handler")
-				.recv()
-				.await;
-		};
-
-		#[cfg(not(unix))]
-		let terminate = std::future::pending::<()>();
-
-		tokio::select! {
-			_ = ctrl_c => {},
-			_ = terminate => {},
-		}
-	}
 
 	let listener = tokio::net::TcpListener::bind(&config::get_http_host_to_serve())
 		.await

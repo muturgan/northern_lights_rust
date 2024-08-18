@@ -67,6 +67,8 @@ impl Store for MockStore {
 	async fn read_users(&self) -> Result<Vec<User>, sqlx::Error> {
 		return Ok(STORE.borrow().iter().map(|user| user.to_user()).collect());
 	}
+
+	async fn close(&self) {}
 }
 
 #[cfg(test)]

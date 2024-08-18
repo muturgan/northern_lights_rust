@@ -58,4 +58,8 @@ impl Store for PostgresStore {
 			.fetch_all(&self.pool)
 			.await;
 	}
+
+	async fn close(&self) {
+		self.pool.close().await;
+	}
 }

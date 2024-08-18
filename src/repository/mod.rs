@@ -27,6 +27,8 @@ trait Store {
 	) -> Result<InsertedPromo, RepoError>;
 
 	async fn read_users(&self) -> Result<Vec<User>, sqlx::Error>;
+
+	async fn close(&self) -> ();
 }
 
 #[derive(Clone)]
@@ -72,6 +74,13 @@ impl Repository {
 		return match &self.store {
 			StoreKind::Mock(store) => store.read_users().await,
 			StoreKind::Postgres(store) => store.read_users().await,
+		};
+	}
+
+	pub async fn close(&self) {
+		match &self.store {
+			StoreKind::Mock(store) => store.close().await,
+			StoreKind::Postgres(store) => store.close().await,
 		};
 	}
 }
