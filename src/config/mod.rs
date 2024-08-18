@@ -64,3 +64,10 @@ pub fn get_bips() -> Vec<String> {
 
 	return bips;
 }
+
+pub fn is_test() -> bool {
+	return match readEnvVar("ENV") {
+		Err(_) => false,
+		Ok(val) => val == "test",
+	};
+}
