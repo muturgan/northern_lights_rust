@@ -1,4 +1,4 @@
-mod db;
+mod pool;
 
 use super::{RepoError, Store};
 use crate::models::{InsertedPromo, User};
@@ -12,7 +12,7 @@ pub struct PostgresStore {
 
 impl PostgresStore {
 	pub async fn new() -> Self {
-		let pool = db::create_db_connection().await;
+		let pool = pool::create_db_connection().await;
 		Self { pool }
 	}
 }
