@@ -3,5 +3,5 @@ use promo_codes::*;
 #[test]
 fn read_bips() {
 	let bips = config::get_bips();
-	assert!(bips.len() > 0);
+	assert!(!bips.is_empty());
 }
