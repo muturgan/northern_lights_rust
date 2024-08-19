@@ -1,9 +1,7 @@
 use super::{RepoError, Store};
 use crate::models::{InsertedPromo, User};
+use ::std::sync::{Arc, Mutex};
 use chrono::{DateTime, NaiveDate, Utc};
-use std::cell::RefCell;
-
-const STORE: RefCell<Vec<MockUser>> = RefCell::new(Vec::new());
 
 #[derive(Clone)]
 struct MockUser {
@@ -30,11 +28,15 @@ impl MockUser {
 }
 
 #[derive(Clone)]
-pub struct MockStore {}
+pub struct MockStore {
+	store: Arc<Mutex<Vec<MockUser>>>,
+}
 
 impl MockStore {
 	pub fn new() -> Self {
-		Self {}
+		Self {
+			store: Arc::new(Mutex::new(Vec::new())),
+		}
 	}
 }
 
@@ -46,8 +48,15 @@ impl Store for MockStore {
 		phone: String,
 		promocode: String,
 	) -> Result<InsertedPromo, RepoError> {
+		let mut current_store = self.store.lock().unwrap();
+
+		let existing_user = current_store.iter().find(|u| u.phone == phone);
+		if existing_user.is_some() {
+			return Err(RepoError::AlreadyExists(phone));
+		}
+
 		let new_user = MockUser {
-			id: STORE.borrow().len() as u32,
+			id: current_store.len() as u32 + 1,
 			firstname,
 			birthdate,
 			phone: phone,
@@ -58,7 +67,7 @@ impl Store for MockStore {
 
 		let inserted_promo = new_user.promocode.clone();
 
-		STORE.borrow_mut().push(new_user);
+		current_store.push(new_user);
 
 		return Ok(InsertedPromo {
 			promocode: inserted_promo,
@@ -66,7 +75,8 @@ impl Store for MockStore {
 	}
 
 	async fn read_users(&self) -> Result<Vec<User>, sqlx::Error> {
-		return Ok(STORE.borrow().iter().map(|user| user.to_user()).collect());
+		let current_store = self.store.lock().unwrap();
+		return Ok(current_store.iter().map(|user| user.to_user()).collect());
 	}
 
 	async fn close(&self) {}
