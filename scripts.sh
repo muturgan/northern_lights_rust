@@ -5,11 +5,11 @@ build() {
 }
 
 dev() {
-	export $(cat .env | xargs) && cargo run
+	export $(cat .env | grep -v '^#' | xargs) && cargo run
 }
 
 start_release() {
-	export $(cat .env | xargs) && ./target/release/promo_codes
+	export $(cat .env | grep -v '^#' | xargs) && ./target/release/promo_codes
 }
 
 start() {
