@@ -1,6 +1,5 @@
-use std::sync::Arc;
-
 use crate::repository::Repository;
+use ::std::sync::Arc;
 
 pub async fn shutdown_signal(repo: Arc<Repository>) {
 	let ctrl_c = || async {

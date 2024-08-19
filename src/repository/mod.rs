@@ -1,16 +1,16 @@
-mod mock;
-mod postgr;
-
-use chrono::NaiveDate;
+mod implementations;
+pub mod models;
 
 use crate::config;
-use crate::models::{InsertedPromo, User};
 use crate::system_models::AppError;
+use chrono::NaiveDate;
+use implementations::{MockStore, PostgresStore};
+use models::{InsertedPromo, User};
 
 #[derive(Clone)]
 enum StoreKind {
-	Mock(mock::MockStore),
-	Postgres(postgr::PostgresStore),
+	Mock(MockStore),
+	Postgres(PostgresStore),
 }
 
 trait Store {
@@ -36,12 +36,12 @@ impl Repository {
 	pub async fn new() -> Self {
 		if config::is_test() {
 			return Self {
-				store: StoreKind::Mock(mock::MockStore::new()),
+				store: StoreKind::Mock(MockStore::new()),
 			};
 		}
 
 		return Self {
-			store: StoreKind::Postgres(postgr::PostgresStore::new().await),
+			store: StoreKind::Postgres(PostgresStore::new().await),
 		};
 	}
 

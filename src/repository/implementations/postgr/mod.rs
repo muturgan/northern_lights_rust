@@ -1,7 +1,7 @@
 mod pool;
 
-use super::Store;
-use crate::models::{InsertedPromo, User};
+use super::super::Store;
+use crate::repository::models::{InsertedPromo, User};
 use crate::system_models::AppError;
 use chrono::NaiveDate;
 use sqlx::{Error as EqlxError, PgPool};

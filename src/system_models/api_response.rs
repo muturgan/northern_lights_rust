@@ -1,4 +1,4 @@
-use crate::models;
+use crate::repository::models;
 use crate::system_models::errors::AppError;
 use crate::system_models::scenario_status::EScenarioStatus;
 use axum::{
@@ -6,7 +6,6 @@ use axum::{
 	response::{IntoResponse, Response},
 	Json,
 };
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]

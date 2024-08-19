@@ -1,14 +1,12 @@
-use ::std::sync::Arc;
-
-use axum::{http::StatusCode, response::IntoResponse, Extension, Json};
-use chrono::NaiveDate;
-use pad::{Alignment, PadStr};
-use rand::Rng;
-
 use crate::config;
 use crate::dto::RegistrationDto;
 use crate::repository::Repository;
 use crate::system_models::ApiResponse;
+use ::std::sync::Arc;
+use axum::{http::StatusCode, response::IntoResponse, Extension, Json};
+use chrono::NaiveDate;
+use pad::{Alignment, PadStr};
+use rand::Rng;
 
 const MIN_POSTFIX_VALUE: usize = 1;
 const MAX_POSTFIX_VALUE: usize = 999;
