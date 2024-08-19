@@ -24,7 +24,7 @@ trait Store {
 
 	async fn read_users(&self) -> Result<Vec<User>, AppError>;
 
-	async fn close(&self) -> ();
+	async fn close(&self);
 }
 
 #[derive(Clone)]

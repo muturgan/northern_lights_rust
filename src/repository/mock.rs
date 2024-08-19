@@ -20,10 +20,10 @@ impl MockUser {
 		return User {
 			id: self.id,
 			firstname: self.firstname.clone(),
-			birthdate: self.birthdate.clone(),
+			birthdate: self.birthdate,
 			phone: self.phone.clone(),
 			email: self.email.clone(),
-			created_at: self.created_at.clone(),
+			created_at: self.created_at,
 		};
 	}
 }
@@ -69,7 +69,7 @@ impl Store for MockStore {
 			id: current_store.len() as u32 + 1,
 			firstname,
 			birthdate,
-			phone: phone,
+			phone,
 			email: None,
 			created_at: DateTime::default(),
 			promocode,

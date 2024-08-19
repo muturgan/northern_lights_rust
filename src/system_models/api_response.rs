@@ -100,11 +100,7 @@ impl From<AppError> for ApiResponse {
 	fn from(err: AppError) -> Self {
 		match err {
 			AppError::ScenarioError(result, payload) => {
-				let p = match payload {
-					Some(p) => Some(serde_json::json!(p)),
-					None => None,
-				};
-				ApiResponse::scenario_fail(result, p)
+				ApiResponse::scenario_fail(result, payload.map(|p| serde_json::json!(p)))
 			}
 			AppError::SystemError(result) => ApiResponse::system_error(result, None),
 		}
