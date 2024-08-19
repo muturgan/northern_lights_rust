@@ -1,3 +1,5 @@
+use ::std::sync::Arc;
+
 use axum::{http::StatusCode, response::IntoResponse, Extension, Json};
 use chrono::NaiveDate;
 use pad::{Alignment, PadStr};
@@ -17,7 +19,7 @@ pub async fn favicon_handler() -> impl IntoResponse {
 }
 
 pub async fn registration(
-	Extension(repo): Extension<Repository>,
+	Extension(repo): Extension<Arc<Repository>>,
 	Json(body): Json<RegistrationDto>,
 ) -> ApiResponse {
 	let birth_date = NaiveDate::parse_from_str(&body.birth_date, "%Y-%m-%d").unwrap();
@@ -34,7 +36,7 @@ pub async fn registration(
 	};
 }
 
-pub async fn users(Extension(repo): Extension<Repository>) -> ApiResponse {
+pub async fn users(Extension(repo): Extension<Arc<Repository>>) -> ApiResponse {
 	let query_result = repo.read_users().await;
 	return match query_result {
 		Err(err) => ApiResponse::from(err),

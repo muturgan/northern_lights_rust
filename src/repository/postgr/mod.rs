@@ -12,15 +12,6 @@ impl From<EqlxError> for AppError {
 	}
 }
 
-// impl<T> From<Result<T, EqlxError>> for Result<T, AppError> {
-// 	fn from(result: Result<T, EqlxError>) -> Self {
-// 		return match result {
-// 			Err(err) => Err(AppError::SystemError(err.to_string())),
-// 			Ok(data) => Ok(data),
-// 		};
-// 	}
-// }
-
 #[derive(Clone)]
 pub struct PostgresStore {
 	pool: PgPool,

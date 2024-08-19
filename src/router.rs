@@ -1,3 +1,5 @@
+use ::std::sync::Arc;
+
 use axum::{
 	routing::{get, post},
 	Extension, Router,
@@ -7,7 +9,7 @@ use tower_http::services::{ServeDir, ServeFile};
 use crate::handler::{favicon_handler, registration, users};
 use crate::repository::Repository;
 
-pub fn create_router(repo: Repository) -> Router {
+pub fn create_router(repo: Arc<Repository>) -> Router {
 	return Router::new()
 		.route("/api/registration", post(registration))
 		.route("/api/users", get(users))
