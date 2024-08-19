@@ -18,7 +18,11 @@ start() {
 }
 
 test() {
-	cargo test
+	export $(cat .env | grep -v '^#' | xargs) && cargo test
+}
+
+bin() {
+	export $(cat .env | grep -v '^#' | xargs) && cargo run --bin workflow
 }
 
 clippy() {

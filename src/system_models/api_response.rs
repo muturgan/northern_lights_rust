@@ -11,9 +11,9 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ApiResponse {
-	status: EScenarioStatus,
-	result: String,
-	payload: Option<serde_json::Value>,
+	pub status: EScenarioStatus,
+	pub result: String,
+	pub payload: Option<serde_json::Value>,
 }
 
 impl ApiResponse {
