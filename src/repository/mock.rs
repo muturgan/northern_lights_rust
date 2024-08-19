@@ -1,5 +1,6 @@
-use super::{RepoError, Store};
+use super::Store;
 use crate::models::{InsertedPromo, User};
+use crate::system_models::AppError;
 use ::std::sync::{Arc, Mutex};
 use chrono::{DateTime, NaiveDate, Utc};
 
@@ -47,12 +48,21 @@ impl Store for MockStore {
 		birthdate: NaiveDate,
 		phone: String,
 		promocode: String,
-	) -> Result<InsertedPromo, RepoError> {
-		let mut current_store = self.store.lock().unwrap();
+	) -> Result<InsertedPromo, AppError> {
+		let current_store = self.store.lock();
+		let mut current_store = match current_store {
+			Err(err) => {
+				return Err(AppError::SystemError(err.to_string()));
+			}
+			Ok(st) => st,
+		};
 
 		let existing_user = current_store.iter().find(|u| u.phone == phone);
 		if existing_user.is_some() {
-			return Err(RepoError::AlreadyExists(phone));
+			return Err(AppError::ScenarioError(
+				format!("Пользователь с номером телефона {phone} уже существует"),
+				Some(phone),
+			));
 		}
 
 		let new_user = MockUser {
@@ -74,8 +84,14 @@ impl Store for MockStore {
 		});
 	}
 
-	async fn read_users(&self) -> Result<Vec<User>, sqlx::Error> {
-		let current_store = self.store.lock().unwrap();
+	async fn read_users(&self) -> Result<Vec<User>, AppError> {
+		let current_store = self.store.lock();
+		let current_store = match current_store {
+			Err(err) => {
+				return Err(AppError::SystemError(err.to_string()));
+			}
+			Ok(st) => st,
+		};
 		return Ok(current_store.iter().map(|user| user.to_user()).collect());
 	}
 

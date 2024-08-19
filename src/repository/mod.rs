@@ -5,11 +5,7 @@ use chrono::NaiveDate;
 
 use crate::config;
 use crate::models::{InsertedPromo, User};
-
-pub enum RepoError {
-	AlreadyExists(String),
-	Fail(String),
-}
+use crate::system_models::AppError;
 
 #[derive(Clone)]
 enum StoreKind {
@@ -24,9 +20,9 @@ trait Store {
 		birth_date: NaiveDate,
 		phone: String,
 		promocode: String,
-	) -> Result<InsertedPromo, RepoError>;
+	) -> Result<InsertedPromo, AppError>;
 
-	async fn read_users(&self) -> Result<Vec<User>, sqlx::Error>;
+	async fn read_users(&self) -> Result<Vec<User>, AppError>;
 
 	async fn close(&self) -> ();
 }
@@ -55,7 +51,7 @@ impl Repository {
 		birth_date: NaiveDate,
 		phone: String,
 		promocode: String,
-	) -> Result<InsertedPromo, RepoError> {
+	) -> Result<InsertedPromo, AppError> {
 		match &self.store {
 			StoreKind::Mock(store) => {
 				return store
@@ -70,7 +66,7 @@ impl Repository {
 		};
 	}
 
-	pub async fn read_users(&self) -> Result<Vec<User>, sqlx::Error> {
+	pub async fn read_users(&self) -> Result<Vec<User>, AppError> {
 		return match &self.store {
 			StoreKind::Mock(store) => store.read_users().await,
 			StoreKind::Postgres(store) => store.read_users().await,

@@ -1,9 +1,25 @@
 mod pool;
 
-use super::{RepoError, Store};
+use super::Store;
 use crate::models::{InsertedPromo, User};
+use crate::system_models::AppError;
 use chrono::NaiveDate;
-use sqlx::PgPool;
+use sqlx::{Error as EqlxError, PgPool};
+
+impl From<EqlxError> for AppError {
+	fn from(err: EqlxError) -> Self {
+		return AppError::SystemError(err.to_string());
+	}
+}
+
+// impl<T> From<Result<T, EqlxError>> for Result<T, AppError> {
+// 	fn from(result: Result<T, EqlxError>) -> Self {
+// 		return match result {
+// 			Err(err) => Err(AppError::SystemError(err.to_string())),
+// 			Ok(data) => Ok(data),
+// 		};
+// 	}
+// }
 
 #[derive(Clone)]
 pub struct PostgresStore {
@@ -24,7 +40,7 @@ impl Store for PostgresStore {
 		birth_date: NaiveDate,
 		phone: String,
 		promocode: String,
-	) -> Result<InsertedPromo, RepoError> {
+	) -> Result<InsertedPromo, AppError> {
 		let query_result = sqlx::query_as::<_, InsertedPromo>(
 			"WITH inserted_user AS (
 				INSERT INTO users (firstname,birthdate,phone) VALUES ($1, $2, $3) RETURNING id
@@ -44,19 +60,22 @@ impl Store for PostgresStore {
 			Err(err) => {
 				let err_str = err.to_string();
 				if err_str.contains("duplicate key") {
-					Err(RepoError::AlreadyExists(phone))
+					Err(AppError::ScenarioError(
+						format!("Пользователь с номером телефона {phone} уже существует"),
+						Some(phone),
+					))
 				} else {
-					Err(RepoError::Fail(err_str))
+					Err(AppError::SystemError(err_str))
 				}
 			}
 			Ok(p) => Ok(p),
 		};
 	}
 
-	async fn read_users(&self) -> Result<Vec<User>, sqlx::Error> {
-		return sqlx::query_as::<_, User>("SELECT * FROM users")
+	async fn read_users(&self) -> Result<Vec<User>, AppError> {
+		return Ok(sqlx::query_as::<_, User>("SELECT * FROM users")
 			.fetch_all(&self.pool)
-			.await;
+			.await?);
 	}
 
 	async fn close(&self) {

@@ -1,4 +1,5 @@
 use crate::models;
+use crate::system_models::errors::AppError;
 use crate::system_models::scenario_status::EScenarioStatus;
 use axum::{
 	http::StatusCode,
@@ -92,5 +93,20 @@ impl ApiResponse {
 impl IntoResponse for ApiResponse {
 	fn into_response(self) -> Response {
 		(StatusCode::OK, Json(self)).into_response()
+	}
+}
+
+impl From<AppError> for ApiResponse {
+	fn from(err: AppError) -> Self {
+		match err {
+			AppError::ScenarioError(result, payload) => {
+				let p = match payload {
+					Some(p) => Some(serde_json::json!(p)),
+					None => None,
+				};
+				ApiResponse::scenario_fail(result, p)
+			}
+			AppError::SystemError(result) => ApiResponse::system_error(result, None),
+		}
 	}
 }

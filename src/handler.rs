@@ -5,8 +5,8 @@ use rand::Rng;
 
 use crate::config;
 use crate::dto::RegistrationDto;
-use crate::repository::{RepoError, Repository};
-use crate::system_models::api_response::ApiResponse;
+use crate::repository::Repository;
+use crate::system_models::ApiResponse;
 
 const MIN_POSTFIX_VALUE: usize = 1;
 const MAX_POSTFIX_VALUE: usize = 999;
@@ -29,17 +29,15 @@ pub async fn registration(
 		.await;
 
 	return match query_result {
-		Err(err) => match err {
-			RepoError::AlreadyExists(phone) => ApiResponse::user_already_exists(phone),
-			RepoError::Fail(err_message) => ApiResponse::system_error(err_message, None),
-		},
+		Err(err) => ApiResponse::from(err),
 		Ok(p) => ApiResponse::user_registered(p.promocode),
 	};
 }
 
 pub async fn users(Extension(repo): Extension<Repository>) -> ApiResponse {
-	return match repo.read_users().await {
-		Err(err) => ApiResponse::system_error(err.to_string(), None),
+	let query_result = repo.read_users().await;
+	return match query_result {
+		Err(err) => ApiResponse::from(err),
 		Ok(users) => ApiResponse::user_list(users),
 	};
 }
