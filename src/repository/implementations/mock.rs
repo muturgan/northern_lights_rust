@@ -71,7 +71,7 @@ impl Store for MockStore {
 			birthdate,
 			phone,
 			email: None,
-			created_at: DateTime::default(),
+			created_at: Utc::now(),
 			promocode,
 		};
 
