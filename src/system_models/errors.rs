@@ -9,7 +9,18 @@ pub enum AppError {
 
 impl Display for AppError {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		write!(f, "{}", self)
+		return match self {
+			AppError::ScenarioError(msg, ctx) => {
+				let ctx_str = match ctx {
+					Some(str) => format!(" ({str})"),
+					None => String::default(),
+				};
+				write!(f, "ScenarioError: {msg}{ctx_str}")
+			}
+			AppError::SystemError(msg) => {
+				write!(f, "SystemError: {}", msg)
+			}
+		};
 	}
 }
 
