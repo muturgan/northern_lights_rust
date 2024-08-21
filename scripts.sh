@@ -26,18 +26,15 @@ bin() {
 }
 
 clippy() {
-	cargo clippy --all --all-features --tests -- -D warnings;
-	echo "clippy is ok";
+	(cargo clippy --all --all-features --tests -- -D warnings && echo "clippy is ok") || exit 1;
 }
 
 fmt() {
-	cargo fmt -- --check;
-	echo "fmt is ok";
+	(cargo fmt -- --check && echo "fmt is ok") || exit 1;
 }
 
 lint() {
-	clippy;
-	fmt;
+	clippy && fmt;
 }
 
 "$@"
