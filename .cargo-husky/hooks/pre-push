@@ -1,2 +1,2 @@
 #!/bin/sh
-cargo check
+sh scripts.sh check

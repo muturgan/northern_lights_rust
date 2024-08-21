@@ -25,6 +25,10 @@ bin() {
 	export $(cat .env | grep -v '^#' | xargs) && cargo run --bin workflow
 }
 
+check() {
+	(cargo check && echo "check is ok") || exit 1;
+}
+
 clippy() {
 	(cargo clippy --all --all-features --tests -- -D warnings && echo "clippy is ok") || exit 1;
 }
