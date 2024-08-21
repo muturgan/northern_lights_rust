@@ -41,4 +41,8 @@ lint() {
 	clippy && fmt;
 }
 
+full_check() {
+	check && clippy && fmt;
+}
+
 "$@"

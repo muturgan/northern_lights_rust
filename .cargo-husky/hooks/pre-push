@@ -1,2 +1,2 @@
 #!/bin/sh
-sh scripts.sh check
+sh scripts.sh full_check
