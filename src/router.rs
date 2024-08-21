@@ -3,7 +3,7 @@ use crate::repository::Repository;
 use ::std::sync::Arc;
 use axum::{
 	routing::{get, post},
-	Extension, Router,
+	Router,
 };
 use tower_http::services::{ServeDir, ServeFile};
 
@@ -15,5 +15,5 @@ pub fn create_router(repo: Arc<Repository>) -> Router {
 		.nest_service("/promo", ServeFile::new("static/promo.html"))
 		.nest_service("/check", ServeFile::new("static/check.html"))
 		.nest_service("/static", ServeDir::new("static"))
-		.layer(Extension(repo));
+		.with_state(repo);
 }

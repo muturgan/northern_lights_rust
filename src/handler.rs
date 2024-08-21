@@ -3,7 +3,7 @@ use crate::dto::RegistrationDto;
 use crate::repository::Repository;
 use crate::system_models::ApiResponse;
 use ::std::sync::Arc;
-use axum::{http::StatusCode, response::IntoResponse, Extension, Json};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use chrono::NaiveDate;
 use pad::{Alignment, PadStr};
 use rand::Rng;
@@ -17,7 +17,7 @@ pub async fn favicon_handler() -> impl IntoResponse {
 }
 
 pub async fn registration(
-	Extension(repo): Extension<Arc<Repository>>,
+	State(repo): State<Arc<Repository>>,
 	Json(body): Json<RegistrationDto>,
 ) -> ApiResponse {
 	let birth_date = NaiveDate::parse_from_str(&body.birth_date, "%Y-%m-%d").unwrap();
@@ -34,7 +34,7 @@ pub async fn registration(
 	};
 }
 
-pub async fn users(Extension(repo): Extension<Arc<Repository>>) -> ApiResponse {
+pub async fn users(State(repo): State<Arc<Repository>>) -> ApiResponse {
 	let query_result = repo.read_users().await;
 	return match query_result {
 		Err(err) => ApiResponse::from(err),
