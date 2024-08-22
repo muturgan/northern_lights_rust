@@ -1,8 +1,14 @@
 use super::super::Store;
 use crate::repository::models::{InsertedPromo, RegisteredUser, UsersPromo};
 use crate::system_models::AppError;
-use ::std::sync::{Arc, Mutex};
+use ::std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 use chrono::{DateTime, NaiveDate, Utc};
+
+impl<'a, T: ?Sized + 'a> From<PoisonError<MutexGuard<'a, T>>> for AppError {
+	fn from(err: PoisonError<MutexGuard<'a, T>>) -> Self {
+		return AppError::SystemError(err.to_string());
+	}
+}
 
 #[derive(Clone)]
 struct MockUser {
@@ -54,13 +60,7 @@ impl Store for MockStore {
 		phone: String,
 		promocode: String,
 	) -> Result<InsertedPromo, AppError> {
-		let current_store = self.store.lock();
-		let mut current_store = match current_store {
-			Err(err) => {
-				return Err(AppError::SystemError(err.to_string()));
-			}
-			Ok(st) => st,
-		};
+		let mut current_store = self.store.lock()?;
 
 		let existing_user = current_store.iter().find(|u| u.phone == phone);
 		if existing_user.is_some() {
@@ -87,14 +87,32 @@ impl Store for MockStore {
 		});
 	}
 
-	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
-		let current_store = self.store.lock();
-		let current_store = match current_store {
-			Err(err) => {
-				return Err(AppError::SystemError(err.to_string()));
-			}
-			Ok(st) => st,
+	async fn check_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError> {
+		let current_store = self.store.lock()?;
+
+		let existing_user = current_store.iter().find(|u| u.phone == user_phone);
+		if existing_user.is_none() {
+			return Err(AppError::promo_not_exists());
+		}
+
+		let existing_user = existing_user.unwrap();
+
+		if existing_user.promocode != promocode {
+			return Err(AppError::promo_not_exists());
+		}
+
+		return match existing_user.activated_at {
+			Some(_) => Err(AppError::promo_already_activated()),
+			None => Ok(()),
 		};
+	}
+
+	async fn activate_promo(&self, _user_phone: String, _promocode: String) -> Result<(), AppError> {
+		todo!()
+	}
+
+	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
+		let current_store = self.store.lock()?;
 		return Ok(current_store.iter().map(|user| user.to_user()).collect());
 	}
 

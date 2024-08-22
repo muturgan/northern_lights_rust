@@ -22,6 +22,13 @@ pub struct Promo {
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct CheckResult {
+	pub promocode: String,
+	pub phone: String,
+	pub activated_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct InsertedPromo {
 	pub promocode: String,
 }

@@ -1,9 +1,9 @@
 mod pool;
 
 use super::super::Store;
-use crate::repository::models::{InsertedPromo, RegisteredUser, RegisteredUserRow};
+use crate::repository::models::{CheckResult, InsertedPromo, RegisteredUser, RegisteredUserRow};
 use crate::system_models::AppError;
-use chrono::NaiveDate;
+use chrono::{NaiveDate, Utc};
 use sqlx::{Error as EqlxError, PgPool};
 
 impl From<EqlxError> for AppError {
@@ -60,13 +60,54 @@ impl Store for PostgresStore {
 		};
 	}
 
+	async fn check_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError> {
+		let mut promos = sqlx::query_as::<_, CheckResult>(
+			"SELECT promocode, phone, activated_at FROM promo P
+			INNER JOIN users U ON P.holder_id = U.ID
+			WHERE promocode = $1 and phone = $2;",
+		)
+		.bind(promocode)
+		.bind(user_phone)
+		.fetch_all(&self.pool)
+		.await?;
+
+		let promo = promos.pop();
+
+		return match promo {
+			None => Err(AppError::promo_not_exists()),
+			Some(p) => match p.activated_at {
+				Some(_) => Err(AppError::promo_already_activated()),
+				None => Ok(()),
+			},
+		};
+	}
+
+	async fn activate_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError> {
+		self.check_promo(user_phone, promocode.clone()).await?;
+
+		let query_result = sqlx::query("UPDATE promo SET activated_at = $1 WHERE promocode = $2;")
+			.bind(Utc::now())
+			.bind(promocode)
+			.execute(&self.pool)
+			.await?;
+
+		if query_result.rows_affected() != 1 {
+			return Err(AppError::SystemError(String::from(
+				"Не удалось выполнить UPDATE для активации промокода",
+			)));
+		}
+
+		return Ok(());
+	}
+
 	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
 		let users_list = sqlx::query_as::<_, RegisteredUserRow>(
 			"SELECT u.*,
 			json_agg(json_build_object('promocode', p.promocode, 'activated_at', p.activated_at)) as promo
 			FROM users u
 			LEFT JOIN promo p ON u.id = p.holder_id
-			GROUP BY u.id;",
+			GROUP BY u.id
+			ORDER BY u.created_at ASC;",
 		)
 		.fetch_all(&self.pool)
 		.await?;

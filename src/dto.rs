@@ -8,3 +8,9 @@ pub struct RegistrationDto {
 	#[serde(rename = "birthDate")]
 	pub birth_date: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PromoDto {
+	pub phone: String,
+	pub promocode: String,
+}

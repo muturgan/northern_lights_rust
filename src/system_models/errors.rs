@@ -33,4 +33,12 @@ impl AppError {
 			Some(phone),
 		)
 	}
+
+	pub fn promo_not_exists() -> Self {
+		AppError::ScenarioError(String::from("Данный промокод не существует"), None)
+	}
+
+	pub fn promo_already_activated() -> Self {
+		AppError::ScenarioError(String::from("Данный промокод уже был активирован"), None)
+	}
 }

@@ -10,6 +10,8 @@ use tower_http::services::{ServeDir, ServeFile};
 pub fn create_router(repo: Arc<Repository>) -> Router {
 	return Router::new()
 		.route("/api/registration", post(H::registration))
+		.route("/api/check", post(H::check))
+		.route("/api/activate", post(H::activate))
 		.route("/api/users", get(H::users))
 		.route("/", get(H::index_handler))
 		.route("/favicon.ico", get(H::favicon_handler))

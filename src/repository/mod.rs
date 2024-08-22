@@ -22,6 +22,10 @@ trait Store {
 		promocode: String,
 	) -> Result<InsertedPromo, AppError>;
 
+	async fn check_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError>;
+
+	async fn activate_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError>;
+
 	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError>;
 
 	async fn close(&self);
@@ -63,6 +67,24 @@ impl Repository {
 					.insert_user_and_grant_promo(first_name, birth_date, phone, promocode)
 					.await
 			}
+		};
+	}
+
+	pub async fn check_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError> {
+		return match &self.store {
+			StoreKind::Mock(store) => store.check_promo(user_phone, promocode).await,
+			StoreKind::Postgres(store) => store.check_promo(user_phone, promocode).await,
+		};
+	}
+
+	pub async fn activate_promo(
+		&self,
+		user_phone: String,
+		promocode: String,
+	) -> Result<(), AppError> {
+		return match &self.store {
+			StoreKind::Mock(store) => store.activate_promo(user_phone, promocode).await,
+			StoreKind::Postgres(store) => store.activate_promo(user_phone, promocode).await,
 		};
 	}
 

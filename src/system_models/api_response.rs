@@ -66,20 +66,6 @@ impl ApiResponse {
 		let payload = serde_json::json!(users);
 		return Self::scenario_success(String::from("Список пользователей"), Some(payload));
 	}
-
-	//  *********************************
-	//  *                               *
-	//  *        Scenario Fail          *
-	//  *                               *
-	//  *********************************
-
-	pub fn promo_not_exists() -> Self {
-		return Self::scenario_fail(String::from("Данный промокод не существует"), None);
-	}
-
-	pub fn promo_already_activated() -> Self {
-		return Self::scenario_fail(String::from("Данный промокод уже был активирован"), None);
-	}
 }
 
 impl IntoResponse for ApiResponse {
