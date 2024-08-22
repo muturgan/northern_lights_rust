@@ -50,11 +50,11 @@ impl Store for PostgresStore {
 		return match query_result {
 			Err(err) => {
 				let err_str = err.to_string();
-				if err_str.contains("duplicate key") {
-					Err(AppError::user_already_exists(phone))
+				Err(if err_str.contains("duplicate key") {
+					AppError::user_already_exists(phone)
 				} else {
-					Err(AppError::SystemError(err_str))
-				}
+					AppError::SystemError(err_str)
+				})
 			}
 			Ok(p) => Ok(p),
 		};
