@@ -3,7 +3,12 @@ use crate::dto::RegistrationDto;
 use crate::repository::Repository;
 use crate::system_models::ApiResponse;
 use ::std::sync::Arc;
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::{
+	extract::State,
+	http::StatusCode,
+	response::{IntoResponse, Redirect},
+	Json,
+};
 use chrono::NaiveDate;
 use pad::{Alignment, PadStr};
 use rand::Rng;
@@ -11,6 +16,10 @@ use rand::Rng;
 const MIN_POSTFIX_VALUE: usize = 1;
 const MAX_POSTFIX_VALUE: usize = 999;
 const MAX_POSTFIX_LENGTH: usize = 3;
+
+pub async fn index_handler() -> Redirect {
+	return Redirect::to("/promo");
+}
 
 pub async fn favicon_handler() -> impl IntoResponse {
 	return StatusCode::NO_CONTENT;
