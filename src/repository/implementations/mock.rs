@@ -55,26 +55,26 @@ impl MockStore {
 impl Store for MockStore {
 	async fn insert_user_and_grant_promo(
 		&self,
-		firstname: String,
+		firstname: &str,
 		birthdate: NaiveDate,
-		phone: String,
-		promocode: String,
+		phone: &str,
+		promocode: &str,
 	) -> Result<InsertedPromo, AppError> {
 		let mut current_store = self.store.lock()?;
 
 		let existing_user = current_store.iter().find(|u| u.phone == phone);
 		if existing_user.is_some() {
-			return Err(AppError::user_already_exists(phone));
+			return Err(AppError::user_already_exists(phone.to_string()));
 		}
 
 		let new_user = MockUser {
 			id: current_store.len() as u32 + 1,
-			firstname,
+			firstname: firstname.to_string(),
 			birthdate,
-			phone,
+			phone: phone.to_string(),
 			email: None,
 			created_at: Utc::now(),
-			promocode,
+			promocode: promocode.to_string(),
 			activated_at: None,
 		};
 
@@ -87,7 +87,7 @@ impl Store for MockStore {
 		});
 	}
 
-	async fn check_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError> {
+	async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
 		let current_store = self.store.lock()?;
 
 		let existing_user = current_store.iter().find(|u| u.phone == user_phone);
@@ -107,7 +107,7 @@ impl Store for MockStore {
 		};
 	}
 
-	async fn activate_promo(&self, _user_phone: String, _promocode: String) -> Result<(), AppError> {
+	async fn activate_promo(&self, _user_phone: &str, _promocode: &str) -> Result<(), AppError> {
 		todo!()
 	}
 

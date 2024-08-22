@@ -34,7 +34,7 @@ pub async fn registration(
 	let promocode = generate_promo_from_bips();
 
 	let query_result = repo
-		.insert_user_and_grant_promo(body.firstName, birth_date, body.phone, promocode)
+		.insert_user_and_grant_promo(&body.firstName, birth_date, &body.phone, &promocode)
 		.await;
 
 	return match query_result {
@@ -44,7 +44,7 @@ pub async fn registration(
 }
 
 pub async fn check(State(repo): State<Arc<Repository>>, Json(body): Json<PromoDto>) -> ApiResponse {
-	let query_result = repo.check_promo(body.phone, body.promocode).await;
+	let query_result = repo.check_promo(&body.phone, &body.promocode).await;
 	return match query_result {
 		Err(err) => ApiResponse::from(err),
 		Ok(_) => ApiResponse::promo_valid(),
@@ -56,14 +56,12 @@ pub async fn activate(
 	Json(body): Json<PromoDto>,
 ) -> ApiResponse {
 	// todo: реализовать в репозитории атомарное действие для активации промокода
-	let query_result = repo
-		.check_promo(body.phone.clone(), body.promocode.clone())
-		.await;
+	let query_result = repo.check_promo(&body.phone, &body.promocode).await;
 	if let Err(err) = query_result {
 		return ApiResponse::from(err);
 	}
 
-	let query_result = repo.activate_promo(body.phone, body.promocode).await;
+	let query_result = repo.activate_promo(&body.phone, &body.promocode).await;
 	return match query_result {
 		Err(err) => ApiResponse::from(err),
 		Ok(_) => ApiResponse::promo_activated(),

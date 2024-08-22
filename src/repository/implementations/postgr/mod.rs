@@ -27,10 +27,10 @@ impl PostgresStore {
 impl Store for PostgresStore {
 	async fn insert_user_and_grant_promo(
 		&self,
-		first_name: String,
+		first_name: &str,
 		birth_date: NaiveDate,
-		phone: String,
-		promocode: String,
+		phone: &str,
+		promocode: &str,
 	) -> Result<InsertedPromo, AppError> {
 		let query_result = sqlx::query_as::<_, InsertedPromo>(
 			"WITH inserted_user AS (
@@ -42,7 +42,7 @@ impl Store for PostgresStore {
 		)
 		.bind(first_name)
 		.bind(birth_date)
-		.bind(&phone)
+		.bind(phone)
 		.bind(promocode)
 		.fetch_one(&self.pool)
 		.await;
@@ -51,7 +51,7 @@ impl Store for PostgresStore {
 			Err(err) => {
 				let err_str = err.to_string();
 				Err(if err_str.contains("duplicate key") {
-					AppError::user_already_exists(phone)
+					AppError::user_already_exists(phone.to_string())
 				} else {
 					AppError::SystemError(err_str)
 				})
@@ -60,7 +60,7 @@ impl Store for PostgresStore {
 		};
 	}
 
-	async fn check_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError> {
+	async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
 		let mut promos = sqlx::query_as::<_, CheckResult>(
 			"SELECT promocode, phone, activated_at FROM promo P
 			INNER JOIN users U ON P.holder_id = U.ID
@@ -82,8 +82,8 @@ impl Store for PostgresStore {
 		};
 	}
 
-	async fn activate_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError> {
-		self.check_promo(user_phone, promocode.clone()).await?;
+	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
+		self.check_promo(user_phone, promocode).await?;
 
 		let query_result = sqlx::query("UPDATE promo SET activated_at = $1 WHERE promocode = $2;")
 			.bind(Utc::now())

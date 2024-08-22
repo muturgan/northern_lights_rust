@@ -16,15 +16,15 @@ enum StoreKind {
 trait Store {
 	async fn insert_user_and_grant_promo(
 		&self,
-		first_name: String,
+		first_name: &str,
 		birth_date: NaiveDate,
-		phone: String,
-		promocode: String,
+		phone: &str,
+		promocode: &str,
 	) -> Result<InsertedPromo, AppError>;
 
-	async fn check_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError>;
+	async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError>;
 
-	async fn activate_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError>;
+	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError>;
 
 	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError>;
 
@@ -51,10 +51,10 @@ impl Repository {
 
 	pub async fn insert_user_and_grant_promo(
 		&self,
-		first_name: String,
+		first_name: &str,
 		birth_date: NaiveDate,
-		phone: String,
-		promocode: String,
+		phone: &str,
+		promocode: &str,
 	) -> Result<InsertedPromo, AppError> {
 		match &self.store {
 			StoreKind::Mock(store) => {
@@ -70,18 +70,14 @@ impl Repository {
 		};
 	}
 
-	pub async fn check_promo(&self, user_phone: String, promocode: String) -> Result<(), AppError> {
+	pub async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
 		return match &self.store {
 			StoreKind::Mock(store) => store.check_promo(user_phone, promocode).await,
 			StoreKind::Postgres(store) => store.check_promo(user_phone, promocode).await,
 		};
 	}
 
-	pub async fn activate_promo(
-		&self,
-		user_phone: String,
-		promocode: String,
-	) -> Result<(), AppError> {
+	pub async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
 		return match &self.store {
 			StoreKind::Mock(store) => store.activate_promo(user_phone, promocode).await,
 			StoreKind::Postgres(store) => store.activate_promo(user_phone, promocode).await,
