@@ -51,10 +51,7 @@ impl Store for PostgresStore {
 			Err(err) => {
 				let err_str = err.to_string();
 				if err_str.contains("duplicate key") {
-					Err(AppError::ScenarioError(
-						format!("Пользователь с номером телефона {phone} уже существует"),
-						Some(phone),
-					))
+					Err(AppError::user_already_exists(phone))
 				} else {
 					Err(AppError::SystemError(err_str))
 				}

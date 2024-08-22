@@ -73,13 +73,6 @@ impl ApiResponse {
 	//  *                               *
 	//  *********************************
 
-	pub fn user_already_exists(phone: String) -> Self {
-		return Self::scenario_fail(
-			format!("Пользователь с номером телефона {phone} уже существует"),
-			Some(serde_json::json!(phone)),
-		);
-	}
-
 	pub fn promo_not_exists() -> Self {
 		return Self::scenario_fail(String::from("Данный промокод не существует"), None);
 	}

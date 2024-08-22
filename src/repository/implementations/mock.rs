@@ -64,10 +64,7 @@ impl Store for MockStore {
 
 		let existing_user = current_store.iter().find(|u| u.phone == phone);
 		if existing_user.is_some() {
-			return Err(AppError::ScenarioError(
-				format!("Пользователь с номером телефона {phone} уже существует"),
-				Some(phone),
-			));
+			return Err(AppError::user_already_exists(phone));
 		}
 
 		let new_user = MockUser {

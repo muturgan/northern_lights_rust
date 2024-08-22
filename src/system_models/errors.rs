@@ -25,3 +25,12 @@ impl Display for AppError {
 }
 
 impl Error for AppError {}
+
+impl AppError {
+	pub fn user_already_exists(phone: String) -> Self {
+		AppError::ScenarioError(
+			format!("Пользователь с номером телефона {phone} уже существует"),
+			Some(phone),
+		)
+	}
+}
