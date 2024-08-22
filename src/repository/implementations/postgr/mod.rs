@@ -1,9 +1,11 @@
 mod pool;
 
 use super::super::Store;
-use crate::repository::models::{CheckResult, InsertedPromo, RegisteredUser, RegisteredUserRow};
+use crate::repository::models::{
+	ActivationResult, CheckResult, InsertedPromo, RegisteredUser, RegisteredUserRow,
+};
 use crate::system_models::AppError;
-use chrono::{NaiveDate, Utc};
+use chrono::NaiveDate;
 use sqlx::{Error as EqlxError, PgPool};
 
 impl From<EqlxError> for AppError {
@@ -83,21 +85,35 @@ impl Store for PostgresStore {
 	}
 
 	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
-		self.check_promo(user_phone, promocode).await?;
+		let mut activation_result = sqlx::query_as::<_, ActivationResult>(
+			"WITH before_update AS (
+			SELECT promocode, holder_id, activated_at FROM promo P
+			INNER JOIN users U ON P.holder_id = U.ID
+			WHERE promocode = $1 and phone = $2
+		),
+		updated_promo AS (
+			UPDATE promo
+			SET activated_at = NOW()
+			WHERE holder_id in (SELECT holder_id FROM before_update)
+			AND activated_at IS NULL
+		)
+		SELECT before_update.activated_at
+		FROM before_update",
+		)
+		.bind(promocode)
+		.bind(user_phone)
+		.fetch_all(&self.pool)
+		.await?;
 
-		let query_result = sqlx::query("UPDATE promo SET activated_at = $1 WHERE promocode = $2;")
-			.bind(Utc::now())
-			.bind(promocode)
-			.execute(&self.pool)
-			.await?;
+		let activation_result = activation_result.pop();
 
-		if query_result.rows_affected() != 1 {
-			return Err(AppError::SystemError(String::from(
-				"Не удалось выполнить UPDATE для активации промокода",
-			)));
-		}
-
-		return Ok(());
+		return match activation_result {
+			None => Err(AppError::promo_not_exists()),
+			Some(result) => match result.activated_at {
+				Some(_) => Err(AppError::promo_already_activated()),
+				None => Ok(()),
+			},
+		};
 	}
 
 	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {

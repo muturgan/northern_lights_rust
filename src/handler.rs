@@ -55,12 +55,6 @@ pub async fn activate(
 	State(repo): State<Arc<Repository>>,
 	Json(body): Json<PromoDto>,
 ) -> ApiResponse {
-	// todo: реализовать в репозитории атомарное действие для активации промокода
-	let query_result = repo.check_promo(&body.phone, &body.promocode).await;
-	if let Err(err) = query_result {
-		return ApiResponse::from(err);
-	}
-
 	let query_result = repo.activate_promo(&body.phone, &body.promocode).await;
 	return match query_result {
 		Err(err) => ApiResponse::from(err),

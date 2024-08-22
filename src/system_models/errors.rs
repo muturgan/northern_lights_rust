@@ -39,6 +39,9 @@ impl AppError {
 	}
 
 	pub fn promo_already_activated() -> Self {
-		AppError::ScenarioError(String::from("Данный промокод уже был активирован"), None)
+		AppError::ScenarioError(
+			String::from("Данный промокод уже был активирован ранее"),
+			None,
+		)
 	}
 }
