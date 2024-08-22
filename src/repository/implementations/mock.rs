@@ -1,5 +1,5 @@
 use super::super::Store;
-use crate::repository::models::{InsertedPromo, User};
+use crate::repository::models::{InsertedPromo, RegisteredUser, UsersPromo};
 use crate::system_models::AppError;
 use ::std::sync::{Arc, Mutex};
 use chrono::{DateTime, NaiveDate, Utc};
@@ -13,17 +13,22 @@ struct MockUser {
 	email: Option<String>,
 	created_at: DateTime<Utc>,
 	promocode: String,
+	activated_at: Option<DateTime<Utc>>,
 }
 
 impl MockUser {
-	fn to_user(&self) -> User {
-		return User {
+	fn to_user(&self) -> RegisteredUser {
+		return RegisteredUser {
 			id: self.id,
 			firstname: self.firstname.clone(),
 			birthdate: self.birthdate,
 			phone: self.phone.clone(),
 			email: self.email.clone(),
 			created_at: self.created_at,
+			promo: vec![UsersPromo {
+				promocode: self.promocode.clone(),
+				activated_at: self.activated_at,
+			}],
 		};
 	}
 }
@@ -73,6 +78,7 @@ impl Store for MockStore {
 			email: None,
 			created_at: Utc::now(),
 			promocode,
+			activated_at: None,
 		};
 
 		let inserted_promo = new_user.promocode.clone();
@@ -84,7 +90,7 @@ impl Store for MockStore {
 		});
 	}
 
-	async fn read_users(&self) -> Result<Vec<User>, AppError> {
+	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
 		let current_store = self.store.lock();
 		let current_store = match current_store {
 			Err(err) => {
@@ -112,6 +118,7 @@ mod tests {
 			email: None,
 			created_at: DateTime::default(),
 			promocode: String::from("p"),
+			activated_at: None,
 		};
 
 		let user = mock_user.to_user();

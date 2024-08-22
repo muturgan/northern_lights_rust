@@ -1,7 +1,7 @@
 mod pool;
 
 use super::super::Store;
-use crate::repository::models::{InsertedPromo, User};
+use crate::repository::models::{InsertedPromo, RegisteredUser, RegisteredUserRow};
 use crate::system_models::AppError;
 use chrono::NaiveDate;
 use sqlx::{Error as EqlxError, PgPool};
@@ -63,10 +63,18 @@ impl Store for PostgresStore {
 		};
 	}
 
-	async fn read_users(&self) -> Result<Vec<User>, AppError> {
-		return Ok(sqlx::query_as::<_, User>("SELECT * FROM users")
-			.fetch_all(&self.pool)
-			.await?);
+	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
+		let users_list = sqlx::query_as::<_, RegisteredUserRow>(
+			"SELECT u.*,
+			json_agg(json_build_object('promocode', p.promocode, 'activated_at', p.activated_at)) as promo
+			FROM users u
+			LEFT JOIN promo p ON u.id = p.holder_id
+			GROUP BY u.id;",
+		)
+		.fetch_all(&self.pool)
+		.await?;
+
+		return Ok(users_list.into_iter().map(RegisteredUser::from).collect());
 	}
 
 	async fn close(&self) {

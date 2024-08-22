@@ -5,7 +5,7 @@ use crate::config;
 use crate::system_models::AppError;
 use chrono::NaiveDate;
 use implementations::{MockStore, PostgresStore};
-use models::{InsertedPromo, User};
+use models::{InsertedPromo, RegisteredUser};
 
 #[derive(Clone)]
 enum StoreKind {
@@ -22,7 +22,7 @@ trait Store {
 		promocode: String,
 	) -> Result<InsertedPromo, AppError>;
 
-	async fn read_users(&self) -> Result<Vec<User>, AppError>;
+	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError>;
 
 	async fn close(&self);
 }
@@ -66,7 +66,7 @@ impl Repository {
 		};
 	}
 
-	pub async fn read_users(&self) -> Result<Vec<User>, AppError> {
+	pub async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
 		return match &self.store {
 			StoreKind::Mock(store) => store.read_users().await,
 			StoreKind::Postgres(store) => store.read_users().await,

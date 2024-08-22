@@ -62,7 +62,7 @@ impl ApiResponse {
 		return Self::scenario_success(String::from("Промокод успешно активирован"), None);
 	}
 
-	pub fn user_list(users: Vec<models::User>) -> Self {
+	pub fn user_list(users: Vec<models::RegisteredUser>) -> Self {
 		let payload = serde_json::json!(users);
 		return Self::scenario_success(String::from("Список пользователей"), Some(payload));
 	}
