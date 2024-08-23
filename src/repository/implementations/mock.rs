@@ -64,7 +64,7 @@ impl Store for MockStore {
 
 		let existing_user = current_store.iter().find(|u| u.phone == phone);
 		if existing_user.is_some() {
-			return Err(AppError::user_already_exists(phone.to_string()));
+			return AppError::user_already_exists(phone.to_string()).into();
 		}
 
 		let new_user = MockUser {
@@ -92,17 +92,17 @@ impl Store for MockStore {
 
 		let existing_user = current_store.iter().find(|u| u.phone == user_phone);
 		if existing_user.is_none() {
-			return Err(AppError::promo_not_exists());
+			return AppError::promo_not_exists().into();
 		}
 
 		let existing_user = existing_user.unwrap();
 
 		if existing_user.promocode != promocode {
-			return Err(AppError::promo_not_exists());
+			return AppError::promo_not_exists().into();
 		}
 
 		return match existing_user.activated_at {
-			Some(_) => Err(AppError::promo_already_activated()),
+			Some(_) => AppError::promo_already_activated().into(),
 			None => Ok(()),
 		};
 	}

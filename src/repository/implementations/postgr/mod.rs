@@ -52,11 +52,11 @@ impl Store for PostgresStore {
 		return match query_result {
 			Err(err) => {
 				let err_str = err.to_string();
-				Err(if err_str.contains("duplicate key") {
-					AppError::user_already_exists(phone.to_string())
+				if err_str.contains("duplicate key") {
+					AppError::user_already_exists(phone.to_string()).into()
 				} else {
-					AppError::SystemError(err_str)
-				})
+					AppError::SystemError(err_str).into()
+				}
 			}
 			Ok(p) => Ok(p),
 		};
@@ -76,9 +76,9 @@ impl Store for PostgresStore {
 		let promo = promos.pop();
 
 		return match promo {
-			None => Err(AppError::promo_not_exists()),
+			None => AppError::promo_not_exists().into(),
 			Some(p) => match p.activated_at {
-				Some(_) => Err(AppError::promo_already_activated()),
+				Some(_) => AppError::promo_already_activated().into(),
 				None => Ok(()),
 			},
 		};
@@ -108,9 +108,9 @@ impl Store for PostgresStore {
 		let activation_result = activation_result.pop();
 
 		return match activation_result {
-			None => Err(AppError::promo_not_exists()),
+			None => AppError::promo_not_exists().into(),
 			Some(result) => match result.activated_at {
-				Some(_) => Err(AppError::promo_already_activated()),
+				Some(_) => AppError::promo_already_activated().into(),
 				None => Ok(()),
 			},
 		};
