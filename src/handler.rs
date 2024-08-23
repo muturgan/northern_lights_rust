@@ -1,7 +1,7 @@
 use crate::config;
 use crate::dto::{PromoDto, RegistrationDto};
 use crate::repository::Repository;
-use crate::system_models::ApiResponse;
+use crate::system_models::{ApiResponse, AppError};
 use ::std::sync::Arc;
 use axum::{
 	extract::State,
@@ -28,46 +28,37 @@ pub async fn favicon_handler() -> impl IntoResponse {
 pub async fn registration(
 	State(repo): State<Arc<Repository>>,
 	Json(body): Json<RegistrationDto>,
-) -> ApiResponse {
+) -> Result<ApiResponse, AppError> {
 	let birth_date = NaiveDate::parse_from_str(&body.birth_date, "%Y-%m-%d").unwrap();
 
 	let promocode = generate_promo_from_bips();
 
 	let query_result = repo
 		.insert_user_and_grant_promo(&body.firstName, birth_date, &body.phone, &promocode)
-		.await;
+		.await?;
 
-	return match query_result {
-		Err(err) => ApiResponse::from(err),
-		Ok(p) => ApiResponse::user_registered(p.promocode),
-	};
+	return ApiResponse::user_registered(query_result.promocode);
 }
 
-pub async fn check(State(repo): State<Arc<Repository>>, Json(body): Json<PromoDto>) -> ApiResponse {
-	let query_result = repo.check_promo(&body.phone, &body.promocode).await;
-	return match query_result {
-		Err(err) => ApiResponse::from(err),
-		Ok(_) => ApiResponse::promo_valid(),
-	};
+pub async fn check(
+	State(repo): State<Arc<Repository>>,
+	Json(body): Json<PromoDto>,
+) -> Result<ApiResponse, AppError> {
+	repo.check_promo(&body.phone, &body.promocode).await?;
+	return ApiResponse::promo_valid();
 }
 
 pub async fn activate(
 	State(repo): State<Arc<Repository>>,
 	Json(body): Json<PromoDto>,
-) -> ApiResponse {
-	let query_result = repo.activate_promo(&body.phone, &body.promocode).await;
-	return match query_result {
-		Err(err) => ApiResponse::from(err),
-		Ok(_) => ApiResponse::promo_activated(),
-	};
+) -> Result<ApiResponse, AppError> {
+	repo.activate_promo(&body.phone, &body.promocode).await?;
+	return ApiResponse::promo_activated();
 }
 
-pub async fn users(State(repo): State<Arc<Repository>>) -> ApiResponse {
-	let query_result = repo.read_users().await;
-	return match query_result {
-		Err(err) => ApiResponse::from(err),
-		Ok(users) => ApiResponse::user_list(users),
-	};
+pub async fn users(State(repo): State<Arc<Repository>>) -> Result<ApiResponse, AppError> {
+	let users = repo.read_users().await?;
+	return ApiResponse::user_list(users);
 }
 
 fn generate_promo_from_bips() -> String {

@@ -46,25 +46,34 @@ impl ApiResponse {
 	//  *                               *
 	//  *********************************
 
-	pub fn user_registered(promocode: String) -> Self {
+	pub fn user_registered(promocode: String) -> Result<Self, AppError> {
 		let upper = promocode.to_uppercase();
-		return Self::scenario_success(
+		return Ok(Self::scenario_success(
 			format!("Новый пользователь успешно зарегистрирован. Промокод: {upper}"),
 			None,
-		);
+		));
 	}
 
-	pub fn promo_valid() -> Self {
-		return Self::scenario_success(String::from("Промокод корректен"), None);
+	pub fn promo_valid() -> Result<Self, AppError> {
+		return Ok(Self::scenario_success(
+			String::from("Промокод корректен"),
+			None,
+		));
 	}
 
-	pub fn promo_activated() -> Self {
-		return Self::scenario_success(String::from("Промокод успешно активирован"), None);
+	pub fn promo_activated() -> Result<Self, AppError> {
+		return Ok(Self::scenario_success(
+			String::from("Промокод успешно активирован"),
+			None,
+		));
 	}
 
-	pub fn user_list(users: Vec<models::RegisteredUser>) -> Self {
+	pub fn user_list(users: Vec<models::RegisteredUser>) -> Result<Self, AppError> {
 		let payload = serde_json::json!(users);
-		return Self::scenario_success(String::from("Список пользователей"), Some(payload));
+		return Ok(Self::scenario_success(
+			String::from("Список пользователей"),
+			Some(payload),
+		));
 	}
 }
 

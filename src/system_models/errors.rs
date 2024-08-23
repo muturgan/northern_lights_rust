@@ -1,5 +1,7 @@
+use super::ApiResponse;
 use ::std::error::Error;
 use ::std::fmt::{Display, Formatter, Result as FmtResult};
+use axum::response::{IntoResponse, Response};
 
 #[derive(Debug)]
 pub enum AppError {
@@ -43,5 +45,11 @@ impl AppError {
 			String::from("Данный промокод уже был активирован ранее"),
 			None,
 		)
+	}
+}
+
+impl IntoResponse for AppError {
+	fn into_response(self) -> Response {
+		ApiResponse::from(self).into_response()
 	}
 }

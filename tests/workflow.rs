@@ -11,7 +11,7 @@ async fn test_workflow() {
 
 	let state_repo = State(repo.clone());
 
-	let users = handler::users(state_repo.clone()).await;
+	let users = handler::users(state_repo.clone()).await.unwrap();
 	assert_eq!(users.status, EScenarioStatus::SCENARIO_SUCCESS);
 	println!("{}", users.payload.unwrap());
 
