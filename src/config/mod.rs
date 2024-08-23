@@ -65,6 +65,10 @@ pub fn get_bips() -> Vec<String> {
 	return bips;
 }
 
+pub fn get_admin_pass() -> String {
+	return readEnvVar("ADMIN_PASS").expect("ADMIN_PASS environment variable is not defined");
+}
+
 pub fn is_test() -> bool {
 	return match readEnvVar("ENV") {
 		Err(_) => false,
