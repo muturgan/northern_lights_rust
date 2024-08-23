@@ -1,4 +1,4 @@
-use super::ApiResponse;
+use super::AppResponse;
 use ::std::error::Error;
 use ::std::fmt::{Display, Formatter, Result as FmtResult};
 use axum::response::{IntoResponse, Response};
@@ -50,6 +50,12 @@ impl AppError {
 
 impl IntoResponse for AppError {
 	fn into_response(self) -> Response {
-		ApiResponse::from(self).into_response()
+		AppResponse::from(self).into_response()
+	}
+}
+
+impl<T> From<AppError> for Result<T, AppError> {
+	fn from(err: AppError) -> Self {
+		return Err(err);
 	}
 }

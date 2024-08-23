@@ -1,3 +1,4 @@
+use super::AppResult;
 use crate::repository::models;
 use crate::system_models::errors::AppError;
 use crate::system_models::scenario_status::EScenarioStatus;
@@ -9,13 +10,13 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ApiResponse {
+pub struct AppResponse {
 	pub status: EScenarioStatus,
 	pub result: String,
 	pub payload: Option<serde_json::Value>,
 }
 
-impl ApiResponse {
+impl AppResponse {
 	fn new(status: EScenarioStatus, result: String, payload: Option<serde_json::Value>) -> Self {
 		return Self {
 			status,
@@ -46,7 +47,7 @@ impl ApiResponse {
 	//  *                               *
 	//  *********************************
 
-	pub fn user_registered(promocode: String) -> Result<Self, AppError> {
+	pub fn user_registered(promocode: String) -> AppResult {
 		let upper = promocode.to_uppercase();
 		return Ok(Self::scenario_success(
 			format!("Новый пользователь успешно зарегистрирован. Промокод: {upper}"),
@@ -54,21 +55,21 @@ impl ApiResponse {
 		));
 	}
 
-	pub fn promo_valid() -> Result<Self, AppError> {
+	pub fn promo_valid() -> AppResult {
 		return Ok(Self::scenario_success(
 			String::from("Промокод корректен"),
 			None,
 		));
 	}
 
-	pub fn promo_activated() -> Result<Self, AppError> {
+	pub fn promo_activated() -> AppResult {
 		return Ok(Self::scenario_success(
 			String::from("Промокод успешно активирован"),
 			None,
 		));
 	}
 
-	pub fn user_list(users: Vec<models::RegisteredUser>) -> Result<Self, AppError> {
+	pub fn user_list(users: Vec<models::RegisteredUser>) -> AppResult {
 		let payload = serde_json::json!(users);
 		return Ok(Self::scenario_success(
 			String::from("Список пользователей"),
@@ -77,19 +78,19 @@ impl ApiResponse {
 	}
 }
 
-impl IntoResponse for ApiResponse {
+impl IntoResponse for AppResponse {
 	fn into_response(self) -> Response {
 		(StatusCode::OK, Json(self)).into_response()
 	}
 }
 
-impl From<AppError> for ApiResponse {
+impl From<AppError> for AppResponse {
 	fn from(err: AppError) -> Self {
 		match err {
 			AppError::ScenarioError(result, payload) => {
-				ApiResponse::scenario_fail(result, payload.map(|p| serde_json::json!(p)))
+				AppResponse::scenario_fail(result, payload.map(|p| serde_json::json!(p)))
 			}
-			AppError::SystemError(result) => ApiResponse::system_error(result, None),
+			AppError::SystemError(result) => AppResponse::system_error(result, None),
 		}
 	}
 }

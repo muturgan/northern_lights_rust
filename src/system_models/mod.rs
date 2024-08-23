@@ -1,7 +1,9 @@
-mod api_response;
 mod errors;
+mod response;
 mod scenario_status;
 
-pub use api_response::ApiResponse;
 pub use errors::AppError;
+pub use response::AppResponse;
 pub use scenario_status::EScenarioStatus;
+
+pub type AppResult = Result<AppResponse, AppError>;

@@ -1,7 +1,7 @@
 use crate::config;
 use crate::dto::{PromoDto, RegistrationDto};
 use crate::repository::Repository;
-use crate::system_models::{ApiResponse, AppError};
+use crate::system_models::{AppResponse, AppResult};
 use ::std::sync::Arc;
 use axum::{
 	extract::State,
@@ -28,7 +28,7 @@ pub async fn favicon_handler() -> impl IntoResponse {
 pub async fn registration(
 	State(repo): State<Arc<Repository>>,
 	Json(body): Json<RegistrationDto>,
-) -> Result<ApiResponse, AppError> {
+) -> AppResult {
 	let birth_date = NaiveDate::parse_from_str(&body.birth_date, "%Y-%m-%d").unwrap();
 
 	let promocode = generate_promo_from_bips();
@@ -37,28 +37,25 @@ pub async fn registration(
 		.insert_user_and_grant_promo(&body.firstName, birth_date, &body.phone, &promocode)
 		.await?;
 
-	return ApiResponse::user_registered(query_result.promocode);
+	return AppResponse::user_registered(query_result.promocode);
 }
 
-pub async fn check(
-	State(repo): State<Arc<Repository>>,
-	Json(body): Json<PromoDto>,
-) -> Result<ApiResponse, AppError> {
+pub async fn check(State(repo): State<Arc<Repository>>, Json(body): Json<PromoDto>) -> AppResult {
 	repo.check_promo(&body.phone, &body.promocode).await?;
-	return ApiResponse::promo_valid();
+	return AppResponse::promo_valid();
 }
 
 pub async fn activate(
 	State(repo): State<Arc<Repository>>,
 	Json(body): Json<PromoDto>,
-) -> Result<ApiResponse, AppError> {
+) -> AppResult {
 	repo.activate_promo(&body.phone, &body.promocode).await?;
-	return ApiResponse::promo_activated();
+	return AppResponse::promo_activated();
 }
 
-pub async fn users(State(repo): State<Arc<Repository>>) -> Result<ApiResponse, AppError> {
+pub async fn users(State(repo): State<Arc<Repository>>) -> AppResult {
 	let users = repo.read_users().await?;
-	return ApiResponse::user_list(users);
+	return AppResponse::user_list(users);
 }
 
 fn generate_promo_from_bips() -> String {
