@@ -24,3 +24,6 @@ tower-http = { version = "^0.5.2", features = ["fs", "trace"] }
 
 [dev-dependencies]
 cargo-husky = { version = "^1.5.0", default-features = false, features = ["user-hooks"] }
+
+[lints.clippy]
+needless_return = "allow"

@@ -1,4 +1,3 @@
-#![allow(clippy::needless_return)]
 use ::std::sync::Arc;
 use promo_codes::config;
 use promo_codes::graceful_shutdown::shutdown_signal;
