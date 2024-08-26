@@ -107,8 +107,26 @@ impl Store for MockStore {
 		};
 	}
 
-	async fn activate_promo(&self, _user_phone: &str, _promocode: &str) -> Result<(), AppError> {
-		todo!()
+	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
+		let mut current_store = self.store.lock()?;
+
+		let existing_user = current_store
+			.iter_mut()
+			.find(|u| u.phone == user_phone && u.promocode == promocode);
+
+		if existing_user.is_none() {
+			return AppError::promo_not_exists().into();
+		}
+
+		let existing_user = existing_user.unwrap();
+
+		if existing_user.activated_at.is_some() {
+			return AppError::promo_already_activated().into();
+		}
+
+		existing_user.activated_at = Some(Utc::now());
+
+		return Ok(());
 	}
 
 	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
