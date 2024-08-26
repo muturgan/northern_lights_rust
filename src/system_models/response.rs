@@ -87,6 +87,7 @@ impl IntoResponse for AppResponse {
 impl From<AppError> for AppResponse {
 	fn from(err: AppError) -> Self {
 		match err {
+			AppError::UnauthorizedError(result) => AppResponse::unauthorized(result, None),
 			AppError::ScenarioError(result, payload) => {
 				AppResponse::scenario_fail(result, payload.map(|p| serde_json::json!(p)))
 			}

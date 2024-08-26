@@ -12,6 +12,7 @@ codegen-units = 1
 
 [dependencies]
 axum = "^0.7.5"
+axum-extra = { version = "0.9.3", features = ["cookie"] }
 chrono = { version = "^0.4.38", features = ["serde"] }
 pad = "^0.1.6"
 rand = "^0.8.5"
