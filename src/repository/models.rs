@@ -58,6 +58,7 @@ pub struct RegisteredUserRow {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RegisteredUser {
+	#[serde(rename = "ID")]
 	pub id: u32,
 	pub firstname: String,
 	pub birthdate: NaiveDate,
