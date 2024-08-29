@@ -7,9 +7,7 @@ use axum::{
 	extract::State,
 	http::StatusCode,
 	response::{IntoResponse, Redirect},
-	Json,
 };
-use chrono::NaiveDate;
 use pad::{Alignment, PadStr};
 use rand::Rng;
 
@@ -25,30 +23,22 @@ pub async fn favicon_handler() -> impl IntoResponse {
 	return StatusCode::NO_CONTENT;
 }
 
-pub async fn registration(
-	State(repo): State<Arc<Repository>>,
-	Json(body): Json<RegistrationDto>,
-) -> AppResult {
-	let birth_date = NaiveDate::parse_from_str(&body.birth_date, "%Y-%m-%d").unwrap();
-
+pub async fn registration(State(repo): State<Arc<Repository>>, body: RegistrationDto) -> AppResult {
 	let promocode = generate_promo_from_bips();
 
 	let query_result = repo
-		.insert_user_and_grant_promo(&body.firstName, birth_date, &body.phone, &promocode)
+		.insert_user_and_grant_promo(&body.first_name, body.birth_date, &body.phone, &promocode)
 		.await?;
 
 	return AppResponse::user_registered(query_result.promocode);
 }
 
-pub async fn check(State(repo): State<Arc<Repository>>, Json(body): Json<PromoDto>) -> AppResult {
+pub async fn check(State(repo): State<Arc<Repository>>, body: PromoDto) -> AppResult {
 	repo.check_promo(&body.phone, &body.promocode).await?;
 	return AppResponse::promo_valid();
 }
 
-pub async fn activate(
-	State(repo): State<Arc<Repository>>,
-	Json(body): Json<PromoDto>,
-) -> AppResult {
+pub async fn activate(State(repo): State<Arc<Repository>>, body: PromoDto) -> AppResult {
 	repo.activate_promo(&body.phone, &body.promocode).await?;
 	return AppResponse::promo_activated();
 }
