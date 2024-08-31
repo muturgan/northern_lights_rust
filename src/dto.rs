@@ -13,7 +13,7 @@ use validator::Validate;
 use crate::system_models::AppError;
 
 lazy_static! {
-	static ref RE_PHONE: Regex = Regex::new(r"^(\+7)\d{10}$").unwrap();
+	static ref RE_PHONE: Regex = Regex::new(r"^(\+79)\d{9}$").unwrap();
 	static ref RE_PROMO: Regex = Regex::new(r"^[а-я]{4,8}-\d{3}$").unwrap();
 	static ref RE_DATE: Regex = Regex::new(r"^\d{4}-\d{2}-\d{2}$").unwrap();
 }
