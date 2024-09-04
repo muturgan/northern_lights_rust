@@ -1,11 +1,17 @@
 use super::super::Store;
 use crate::repository::models::{InsertedPromo, RegisteredUser, UsersPromo};
 use crate::system_models::AppError;
-use ::std::sync::{Arc, Mutex, MutexGuard, PoisonError};
+use ::std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use chrono::{DateTime, NaiveDate, Utc};
 
-impl<'a, T: ?Sized + 'a> From<PoisonError<MutexGuard<'a, T>>> for AppError {
-	fn from(err: PoisonError<MutexGuard<'a, T>>) -> Self {
+impl<'a, T: ?Sized + 'a> From<PoisonError<RwLockReadGuard<'a, T>>> for AppError {
+	fn from(err: PoisonError<RwLockReadGuard<'a, T>>) -> Self {
+		return AppError::SystemError(err.to_string());
+	}
+}
+
+impl<'a, T: ?Sized + 'a> From<PoisonError<RwLockWriteGuard<'a, T>>> for AppError {
+	fn from(err: PoisonError<RwLockWriteGuard<'a, T>>) -> Self {
 		return AppError::SystemError(err.to_string());
 	}
 }
@@ -41,13 +47,13 @@ impl MockUser {
 
 #[derive(Clone)]
 pub struct MockStore {
-	store: Arc<Mutex<Vec<MockUser>>>,
+	store: Arc<RwLock<Vec<MockUser>>>,
 }
 
 impl MockStore {
 	pub fn new() -> Self {
 		Self {
-			store: Arc::new(Mutex::new(Vec::new())),
+			store: Arc::new(RwLock::new(Vec::new())),
 		}
 	}
 }
@@ -60,7 +66,7 @@ impl Store for MockStore {
 		phone: &str,
 		promocode: &str,
 	) -> Result<InsertedPromo, AppError> {
-		let mut current_store = self.store.lock()?;
+		let mut current_store = self.store.write()?;
 
 		let existing_user = current_store.iter().find(|u| u.phone == phone);
 		if existing_user.is_some() {
@@ -88,7 +94,7 @@ impl Store for MockStore {
 	}
 
 	async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
-		let current_store = self.store.lock()?;
+		let current_store = self.store.read()?;
 
 		let existing_user = current_store.iter().find(|u| u.phone == user_phone);
 		if existing_user.is_none() {
@@ -108,7 +114,7 @@ impl Store for MockStore {
 	}
 
 	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
-		let mut current_store = self.store.lock()?;
+		let mut current_store = self.store.write()?;
 
 		let existing_user = current_store
 			.iter_mut()
@@ -130,7 +136,7 @@ impl Store for MockStore {
 	}
 
 	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
-		let current_store = self.store.lock()?;
+		let current_store = self.store.read()?;
 		return Ok(current_store.iter().map(|user| user.to_user()).collect());
 	}
 
