@@ -1,2 +1,2 @@
-# otus_rust_graduation_project
-Graduation project for the Otus Rust Developer course
+# northern_lights_rust
+A port of my old freelance project for rust learning
