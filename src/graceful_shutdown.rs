@@ -2,12 +2,16 @@ use crate::repository::Repository;
 use ::std::sync::Arc;
 
 pub async fn shutdown_signal(repo: Arc<Repository>) {
+	let shutdown_fn = || async {
+		repo.close().await;
+	};
+
 	let ctrl_c = || async {
 		tokio::signal::ctrl_c()
 			.await
 			.expect("failed to install Ctrl+C handler");
 
-		repo.close().await;
+		shutdown_fn().await;
 	};
 
 	#[cfg(unix)]
@@ -17,7 +21,7 @@ pub async fn shutdown_signal(repo: Arc<Repository>) {
 			.recv()
 			.await;
 
-		repo.close().await;
+		shutdown_fn().await;
 	};
 
 	#[cfg(not(unix))]
