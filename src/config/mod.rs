@@ -23,6 +23,7 @@ pub fn get_http_host_to_serve() -> SocketAddr {
 		.unwrap_or_else(|_| panic!("Unable to parse socket address for {app_host}:{app_port}"));
 }
 
+#[cfg(feature = "postgres")]
 pub fn get_db_config() -> String {
 	let db_host = readEnvVar("DB_HOST").expect("DB_HOST environment variable is not defined");
 
@@ -38,6 +39,7 @@ pub fn get_db_config() -> String {
 	return format!("postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}?schema=public");
 }
 
+#[cfg(feature = "postgres")]
 pub fn get_db_max_pool_size() -> u32 {
 	let default_pool_size = String::from("10");
 

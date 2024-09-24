@@ -1,17 +1,13 @@
 mod implementations;
 pub mod models;
 
-use crate::config;
 use crate::system_models::AppError;
 use chrono::NaiveDate;
-use implementations::{MockStore, PostgresStore};
+#[cfg(not(feature = "postgres"))]
+use implementations::MockStore;
+#[cfg(feature = "postgres")]
+use implementations::PostgresStore;
 use models::{InsertedPromo, RegisteredUser};
-
-#[derive(Clone)]
-enum StoreKind {
-	Mock(MockStore),
-	Postgres(PostgresStore),
-}
 
 trait Store {
 	async fn insert_user_and_grant_promo(
@@ -31,21 +27,28 @@ trait Store {
 	async fn close(&self);
 }
 
+#[cfg(not(feature = "postgres"))]
 #[derive(Clone)]
 pub struct Repository {
-	store: StoreKind,
+	store: MockStore,
+}
+
+#[cfg(feature = "postgres")]
+#[derive(Clone)]
+pub struct Repository {
+	store: PostgresStore,
 }
 
 impl Repository {
 	pub async fn new() -> Self {
-		if config::is_test() {
-			return Self {
-				store: StoreKind::Mock(MockStore::new()),
-			};
-		}
-
+		#[cfg(not(feature = "postgres"))]
 		return Self {
-			store: StoreKind::Postgres(PostgresStore::new().await),
+			store: MockStore::new(),
+		};
+
+		#[cfg(feature = "postgres")]
+		return Self {
+			store: PostgresStore::new().await,
 		};
 	}
 
@@ -56,45 +59,25 @@ impl Repository {
 		phone: &str,
 		promocode: &str,
 	) -> Result<InsertedPromo, AppError> {
-		match &self.store {
-			StoreKind::Mock(store) => {
-				return store
-					.insert_user_and_grant_promo(first_name, birth_date, phone, promocode)
-					.await
-			}
-			StoreKind::Postgres(store) => {
-				return store
-					.insert_user_and_grant_promo(first_name, birth_date, phone, promocode)
-					.await
-			}
-		};
+		return self
+			.store
+			.insert_user_and_grant_promo(first_name, birth_date, phone, promocode)
+			.await;
 	}
 
 	pub async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
-		return match &self.store {
-			StoreKind::Mock(store) => store.check_promo(user_phone, promocode).await,
-			StoreKind::Postgres(store) => store.check_promo(user_phone, promocode).await,
-		};
+		return self.store.check_promo(user_phone, promocode).await;
 	}
 
 	pub async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
-		return match &self.store {
-			StoreKind::Mock(store) => store.activate_promo(user_phone, promocode).await,
-			StoreKind::Postgres(store) => store.activate_promo(user_phone, promocode).await,
-		};
+		return self.store.activate_promo(user_phone, promocode).await;
 	}
 
 	pub async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
-		return match &self.store {
-			StoreKind::Mock(store) => store.read_users().await,
-			StoreKind::Postgres(store) => store.read_users().await,
-		};
+		return self.store.read_users().await;
 	}
 
 	pub async fn close(&self) {
-		match &self.store {
-			StoreKind::Mock(store) => store.close().await,
-			StoreKind::Postgres(store) => store.close().await,
-		};
+		return self.store.close().await;
 	}
 }
