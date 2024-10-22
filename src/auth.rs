@@ -48,10 +48,9 @@ pub async fn auth(cookie_jar: CookieJar, req: Request<Body>, next: Next) -> Resp
 			"{cookie_key}={}; SameSite; {secure}HttpOnly",
 			config::get_admin_pass()
 		);
-		res.headers_mut().append(
-			header::SET_COOKIE,
-			HeaderValue::from_str(&auth_cookie).unwrap(),
-		);
+		if let Ok(cookie_val) = HeaderValue::from_str(&auth_cookie) {
+			res.headers_mut().append(header::SET_COOKIE, cookie_val);
+		}
 	}
 
 	return res;

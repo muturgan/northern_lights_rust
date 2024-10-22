@@ -14,7 +14,7 @@ impl Display for AppError {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		return match self {
 			AppError::UnauthorizedError(msg) => {
-				write!(f, "UnauthorizedError: {}", msg)
+				write!(f, "UnauthorizedError: {msg}")
 			}
 			AppError::ScenarioError(msg, ctx) => {
 				let ctx_str = match ctx {
@@ -24,7 +24,7 @@ impl Display for AppError {
 				write!(f, "ScenarioError: {msg}{ctx_str}")
 			}
 			AppError::SystemError(msg) => {
-				write!(f, "SystemError: {}", msg)
+				write!(f, "SystemError: {msg}")
 			}
 		};
 	}
