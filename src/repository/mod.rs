@@ -27,27 +27,22 @@ trait Store {
 	async fn close(&self);
 }
 
-#[cfg(not(feature = "postgres"))]
 #[derive(Clone)]
 pub struct Repository {
+	#[cfg(not(feature = "postgres"))]
 	store: MockStore,
-}
 
-#[cfg(feature = "postgres")]
-#[derive(Clone)]
-pub struct Repository {
+	#[cfg(feature = "postgres")]
 	store: PostgresStore,
 }
 
 impl Repository {
 	pub async fn new() -> Self {
-		#[cfg(not(feature = "postgres"))]
 		return Self {
+			#[cfg(not(feature = "postgres"))]
 			store: MockStore::new(),
-		};
 
-		#[cfg(feature = "postgres")]
-		return Self {
+			#[cfg(feature = "postgres")]
 			store: PostgresStore::new().await,
 		};
 	}
