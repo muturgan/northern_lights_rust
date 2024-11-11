@@ -25,8 +25,12 @@ impl AppResponse {
 		};
 	}
 
-	fn scenario_success(result: String, payload: Option<serde_json::Value>) -> Self {
-		return Self::new(EScenarioStatus::SCENARIO_SUCCESS, result, payload);
+	fn scenario_success<S: AsRef<str>>(result: S, payload: Option<serde_json::Value>) -> Self {
+		return Self::new(
+			EScenarioStatus::SCENARIO_SUCCESS,
+			result.as_ref().to_string(),
+			payload,
+		);
 	}
 
 	pub fn unauthorized(result: String, payload: Option<serde_json::Value>) -> Self {
@@ -56,23 +60,17 @@ impl AppResponse {
 	}
 
 	pub fn promo_valid() -> AppResult {
-		return Ok(Self::scenario_success(
-			String::from("Промокод корректен"),
-			None,
-		));
+		return Ok(Self::scenario_success("Промокод корректен", None));
 	}
 
 	pub fn promo_activated() -> AppResult {
-		return Ok(Self::scenario_success(
-			String::from("Промокод успешно активирован"),
-			None,
-		));
+		return Ok(Self::scenario_success("Промокод успешно активирован", None));
 	}
 
 	pub fn user_list(users: Vec<models::RegisteredUser>) -> AppResult {
 		let payload = serde_json::json!(users);
 		return Ok(Self::scenario_success(
-			String::from("Список пользователей"),
+			"Список пользователей",
 			Some(payload),
 		));
 	}
