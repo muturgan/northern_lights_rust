@@ -1,13 +1,14 @@
 mod implementations;
 pub mod models;
 
-use crate::system_models::AppError;
 use chrono::NaiveDate;
 #[cfg(not(feature = "postgres"))]
 use implementations::MockStore;
 #[cfg(feature = "postgres")]
 use implementations::PostgresStore;
 use models::{InsertedPromo, RegisteredUser};
+
+use crate::system_models::AppError;
 
 trait Store {
 	async fn insert_user_and_grant_promo(

@@ -1,12 +1,15 @@
 mod pool;
 
-use super::super::Store;
-use crate::repository::models::{
-	ActivationResult, CheckResult, InsertedPromo, RegisteredUser, RegisteredUserRow,
-};
-use crate::system_models::AppError;
 use chrono::NaiveDate;
 use sqlx::{Error as EqlxError, PgPool};
+
+use super::super::Store;
+use crate::{
+	repository::models::{
+		ActivationResult, CheckResult, InsertedPromo, RegisteredUser, RegisteredUserRow,
+	},
+	system_models::AppError,
+};
 
 impl From<EqlxError> for AppError {
 	fn from(err: EqlxError) -> Self {

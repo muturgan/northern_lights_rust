@@ -1,7 +1,7 @@
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "postgres")]
-use sqlx::{types::Json as SqlxJson, FromRow};
+use sqlx::{FromRow, types::Json as SqlxJson};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[cfg_attr(feature = "postgres", derive(FromRow))]

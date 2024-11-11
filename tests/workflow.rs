@@ -1,6 +1,5 @@
 use ::std::sync::Arc;
 use axum::extract::State;
-
 use promo_codes::*;
 use system_models::EScenarioStatus;
 

@@ -1,7 +1,3 @@
-use crate::config;
-use crate::dto::{PromoDto, RegistrationDto};
-use crate::repository::Repository;
-use crate::system_models::{AppResponse, AppResult};
 use ::std::sync::Arc;
 use axum::{
 	extract::State,
@@ -10,6 +6,13 @@ use axum::{
 };
 use pad::{Alignment, PadStr};
 use rand::Rng;
+
+use crate::{
+	config,
+	dto::{PromoDto, RegistrationDto},
+	repository::Repository,
+	system_models::{AppResponse, AppResult},
+};
 
 const MIN_POSTFIX_VALUE: usize = 1;
 const MAX_POSTFIX_VALUE: usize = 999;

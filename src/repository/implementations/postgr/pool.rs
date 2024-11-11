@@ -1,5 +1,6 @@
+use sqlx::{PgPool, postgres::PgPoolOptions};
+
 use crate::config;
-use sqlx::{postgres::PgPoolOptions, PgPool};
 
 pub async fn create_db_connection() -> PgPool {
 	let database_url = config::get_db_config();

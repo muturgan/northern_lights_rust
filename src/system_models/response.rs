@@ -1,13 +1,15 @@
-use super::AppResult;
-use crate::repository::models;
-use crate::system_models::errors::AppError;
-use crate::system_models::scenario_status::EScenarioStatus;
 use axum::{
+	Json,
 	http::StatusCode,
 	response::{IntoResponse, Response},
-	Json,
 };
 use serde::{Deserialize, Serialize};
+
+use super::AppResult;
+use crate::{
+	repository::models,
+	system_models::{errors::AppError, scenario_status::EScenarioStatus},
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AppResponse {

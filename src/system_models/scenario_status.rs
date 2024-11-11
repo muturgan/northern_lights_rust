@@ -1,5 +1,5 @@
 #![allow(clippy::upper_case_acronyms)]
-use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Error};
 
 #[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq)]

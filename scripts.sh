@@ -34,7 +34,7 @@ clippy() {
 }
 
 fmt() {
-	(cargo fmt -- --check && echo "fmt is ok") || exit 1;
+	(cargo +nightly fmt -- --check && echo "fmt is ok") || exit 1;
 }
 
 lint() {

@@ -1,7 +1,10 @@
-use super::AppResponse;
-use ::std::error::Error;
-use ::std::fmt::{Display, Formatter, Result as FmtResult};
+use ::std::{
+	error::Error,
+	fmt::{Display, Formatter, Result as FmtResult},
+};
 use axum::response::{IntoResponse, Response};
+
+use super::AppResponse;
 
 #[derive(Debug)]
 pub enum AppError {

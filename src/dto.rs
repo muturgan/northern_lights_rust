@@ -1,8 +1,7 @@
 use ::std::error::Error;
 use axum::{
-	async_trait,
-	extract::{rejection::JsonRejection, FromRequest, Request},
-	Json, RequestExt,
+	Json, RequestExt, async_trait,
+	extract::{FromRequest, Request, rejection::JsonRejection},
 };
 use chrono::NaiveDate;
 use lazy_static::lazy_static;

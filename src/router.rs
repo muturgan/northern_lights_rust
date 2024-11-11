@@ -1,13 +1,11 @@
-use crate::auth::auth;
-use crate::handler as H;
-use crate::repository::Repository;
 use ::std::sync::Arc;
 use axum::{
-	middleware,
+	Router, middleware,
 	routing::{get, post},
-	Router,
 };
 use tower_http::services::{ServeDir, ServeFile};
+
+use crate::{auth::auth, handler as H, repository::Repository};
 
 pub fn create_router(repo: Arc<Repository>) -> Router {
 	return Router::new()

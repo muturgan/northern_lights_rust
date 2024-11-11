@@ -1,8 +1,10 @@
-use ::std::env::{current_dir, var as readEnvVar};
-use ::std::fs::File;
-use ::std::io::{prelude::*, BufReader};
-use ::std::net::SocketAddr;
-use ::std::path::Path;
+use ::std::{
+	env::{current_dir, var as readEnvVar},
+	fs::File,
+	io::{BufReader, prelude::*},
+	net::SocketAddr,
+	path::Path,
+};
 
 pub fn get_http_host_to_serve() -> SocketAddr {
 	let app_host = readEnvVar("APP_HOST").expect("APP_HOST environment variable is not defined");

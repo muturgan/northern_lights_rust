@@ -1,13 +1,16 @@
-use crate::config;
-use crate::system_models::{AppError, AppResponse};
 use axum::{
 	body::Body,
 	extract::Request,
-	http::{header, HeaderValue},
+	http::{HeaderValue, header},
 	middleware::Next,
 	response::{IntoResponse, Response},
 };
 use axum_extra::extract::cookie::CookieJar;
+
+use crate::{
+	config,
+	system_models::{AppError, AppResponse},
+};
 
 pub async fn auth(cookie_jar: CookieJar, req: Request<Body>, next: Next) -> Response {
 	let cookie_key = if config::is_test() {

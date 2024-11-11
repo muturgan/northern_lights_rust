@@ -1,9 +1,12 @@
-use super::super::Store;
-use crate::repository::models::{InsertedPromo, RegisteredUser, UsersPromo};
-use crate::system_models::AppError;
 use ::std::sync::Arc;
 use chrono::{DateTime, NaiveDate, Utc};
 use tokio::sync::RwLock;
+
+use super::super::Store;
+use crate::{
+	repository::models::{InsertedPromo, RegisteredUser, UsersPromo},
+	system_models::AppError,
+};
 
 #[derive(Clone)]
 struct MockUser {
