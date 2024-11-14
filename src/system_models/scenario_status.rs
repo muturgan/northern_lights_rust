@@ -15,19 +15,13 @@ impl<'de> Deserialize<'de> for EScenarioStatus {
 	where
 		D: Deserializer<'de>,
 	{
-		let numval = u8::deserialize(deserializer);
-		return match numval {
-			Err(e) => Err(e),
-			Ok(num) => {
-				return match num {
-					0 => Ok(EScenarioStatus::SCENARIO_SUCCESS),
-					1 => Ok(EScenarioStatus::UNAUTHORIZED),
-					2 => Ok(EScenarioStatus::SCENARIO_FAIL),
-					3 => Ok(EScenarioStatus::SYSTEM_ERROR),
-					_ => Err(D::Error::custom(String::from("incorrect scenario status"))),
-				};
-			}
-		};
+		match u8::deserialize(deserializer)? {
+			0 => Ok(EScenarioStatus::SCENARIO_SUCCESS),
+			1 => Ok(EScenarioStatus::UNAUTHORIZED),
+			2 => Ok(EScenarioStatus::SCENARIO_FAIL),
+			3 => Ok(EScenarioStatus::SYSTEM_ERROR),
+			_ => Err(D::Error::custom("incorrect scenario status")),
+		}
 	}
 }
 
