@@ -6,30 +6,20 @@ use axum::{
 use chrono::NaiveDate;
 use lazy_static::lazy_static;
 use regex::Regex;
-use serde::{Deserialize, Serialize};
-use validator::Validate;
+use serde::{
+	Deserialize, Deserializer,
+	de::{DeserializeOwned, Error as _},
+};
 
 use crate::system_models::AppError;
 
 lazy_static! {
 	static ref RE_PHONE: Regex =
-		Regex::new(r"^(\+79)\d{9}$").expect("Phone regex should build without errors");
+		Regex::new(r"^(\+79)[0-9]{9}$").expect("Phone regex should build without errors");
 	static ref RE_PROMO: Regex =
-		Regex::new(r"^[а-я]{4,8}-\d{3}$").expect("Promo regex should build without errors");
+		Regex::new(r"^[а-я]{4,8}-[0-9]{3}$").expect("Promo regex should build without errors");
 	static ref RE_DATE: Regex =
-		Regex::new(r"^\d{4}-\d{2}-\d{2}$").expect("Date regex should build without errors");
-}
-
-#[derive(Serialize, Deserialize, Debug, Validate)]
-struct RawRegistrationDto {
-	#[validate(regex(path = "*RE_PHONE", message = "Введён некорректный номер телефона"))]
-	pub phone: String,
-	#[serde(rename = "firstName")]
-	#[validate(length(min = 1, message = "Введено некорректное имя"))]
-	pub first_name: String,
-	#[serde(rename = "birthDate")]
-	#[validate(regex(path = "*RE_DATE", message = "Введена некорректная дата рождения"))]
-	pub birth_date: String,
+		Regex::new(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$").expect("Date regex should build without errors");
 }
 
 #[derive(Debug)]
@@ -39,51 +29,99 @@ pub struct RegistrationDto {
 	pub birth_date: NaiveDate,
 }
 
-#[async_trait]
-impl<S: Send + Sync> FromRequest<S> for RegistrationDto {
-	type Rejection = AppError;
+impl<'de> Deserialize<'de> for RegistrationDto {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: Deserializer<'de>,
+	{
+		#[derive(Deserialize)]
+		struct PlainBody {
+			phone: String,
 
-	async fn from_request(req: Request, _: &S) -> Result<Self, Self::Rejection> {
-		let body = req.extract::<Json<RawRegistrationDto>, _>().await;
-		let dto = handle_parsed_body(body)?;
+			#[serde(rename = "firstName")]
+			first_name: String,
 
-		let birth_date = match NaiveDate::parse_from_str(&dto.birth_date, "%Y-%m-%d") {
-			Err(_) => {
-				return Err(AppError::ScenarioError(
-					String::from("Введена некорректная дата рождения"),
-					None,
-				));
-			}
-			Ok(date) => date,
-		};
+			#[serde(rename = "birthDate")]
+			birth_date: String,
+		}
 
-		return Ok(RegistrationDto {
-			phone: dto.phone,
-			first_name: dto.first_name,
+		let PlainBody {
+			phone,
+			first_name,
 			birth_date,
-		});
+		} = PlainBody::deserialize(deserializer)?;
+
+		if !RE_PHONE.is_match(&phone) {
+			return Err(D::Error::custom("Введён некорректный номер телефона"));
+		}
+		if first_name.is_empty() {
+			return Err(D::Error::custom("Введено некорректное имя"));
+		}
+		if !RE_DATE.is_match(&birth_date) {
+			return Err(D::Error::custom("Введена некорректная дата рождения"));
+		}
+
+		let birth_date = NaiveDate::parse_from_str(&birth_date, "%Y-%m-%d")
+			.map_err(|_| D::Error::custom("Введена некорректная дата рождения"))?;
+
+		Ok(Self {
+			phone,
+			first_name,
+			birth_date,
+		})
 	}
 }
 
-#[derive(Serialize, Deserialize, Debug, Validate)]
+#[derive(Debug)]
 pub struct PromoDto {
-	#[validate(regex(path = "*RE_PHONE", message = "Введён некорректный номер телефона"))]
 	pub phone: String,
-	#[validate(regex(path = "*RE_PROMO", message = "Введён некорректный промокод"))]
 	pub promocode: String,
 }
 
-#[async_trait]
-impl<S: Send + Sync> FromRequest<S> for PromoDto {
-	type Rejection = AppError;
+impl<'de> Deserialize<'de> for PromoDto {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: Deserializer<'de>,
+	{
+		#[derive(Deserialize)]
+		struct PlainBody {
+			phone: String,
+			promocode: String,
+		}
 
-	async fn from_request(req: Request, _: &S) -> Result<Self, Self::Rejection> {
-		let body = req.extract::<Json<PromoDto>, _>().await;
-		return handle_parsed_body(body);
+		let PlainBody { phone, promocode } = PlainBody::deserialize(deserializer)?;
+
+		if !RE_PHONE.is_match(&phone) {
+			return Err(D::Error::custom("Введён некорректный номер телефона"));
+		}
+		if !RE_PROMO.is_match(&promocode) {
+			return Err(D::Error::custom("Введён некорректный промокод"));
+		}
+
+		Ok(Self { phone, promocode })
 	}
 }
 
-fn handle_json_rejection(err: &JsonRejection) -> AppError {
+pub struct Dto<T>(pub T);
+
+#[async_trait]
+impl<T, S> FromRequest<S> for Dto<T>
+where
+	T: 'static + DeserializeOwned,
+	S: Send + Sync,
+{
+	type Rejection = AppError;
+
+	async fn from_request(req: Request, _: &S) -> Result<Self, Self::Rejection> {
+		let body = req.extract::<Json<T>, _>().await;
+		match body {
+			Err(err) => Err(handle_json_rejection(err)),
+			Ok(Json(dto)) => Ok(Dto(dto)),
+		}
+	}
+}
+
+fn handle_json_rejection(err: JsonRejection) -> AppError {
 	return match err {
 		JsonRejection::JsonDataError(data_err) => match data_err.source() {
 			Some(source_err) => AppError::ScenarioError(
@@ -107,18 +145,5 @@ fn handle_json_rejection(err: &JsonRejection) -> AppError {
 		}
 
 		non_exhaustive => AppError::SystemError(non_exhaustive.to_string()),
-	};
-}
-
-fn handle_parsed_body<T: Validate>(result: Result<Json<T>, JsonRejection>) -> Result<T, AppError> {
-	return match result {
-		Err(err) => Err(handle_json_rejection(&err)),
-		Ok(Json(dto)) => match dto.validate() {
-			Err(validation_error) => Err(AppError::ScenarioError(
-				format!("Передано некорректное тело запроса: {validation_error}"),
-				None,
-			)),
-			Ok(_) => Ok(dto),
-		},
 	};
 }

@@ -56,6 +56,7 @@ pub struct RegisteredUser {
 	#[serde(rename = "ID")]
 	#[cfg_attr(feature = "postgres", sqlx(try_from = "i32"))]
 	pub id: u32,
+
 	pub firstname: String,
 	pub birthdate: NaiveDate,
 	pub phone: String,

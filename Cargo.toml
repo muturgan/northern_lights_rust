@@ -23,7 +23,6 @@ serde_json = "^1.0.132"
 sqlx = { version = "^0.8.2", features = ["runtime-tokio-native-tls", "postgres", "chrono"], optional = true }
 tokio = { version = "^1.41.1", features = ["full"] }
 tower-http = { version = "^0.6.1", features = ["fs", "trace"] }
-validator = { version = "^0.18.1", features = ["derive"] }
 
 [features]
 default = ["mock"]

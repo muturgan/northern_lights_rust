@@ -9,7 +9,7 @@ use rand::Rng;
 
 use crate::{
 	config,
-	dto::{PromoDto, RegistrationDto},
+	dto::{Dto, PromoDto, RegistrationDto},
 	repository::Repository,
 	system_models::{AppResponse, AppResult},
 };
@@ -26,7 +26,10 @@ pub async fn favicon_handler() -> impl IntoResponse {
 	return StatusCode::NO_CONTENT;
 }
 
-pub async fn registration(State(repo): State<Arc<Repository>>, body: RegistrationDto) -> AppResult {
+pub async fn registration(
+	State(repo): State<Arc<Repository>>,
+	Dto(body): Dto<RegistrationDto>,
+) -> AppResult {
 	let promocode = generate_promo_from_bips();
 
 	let query_result = repo
@@ -36,12 +39,12 @@ pub async fn registration(State(repo): State<Arc<Repository>>, body: Registratio
 	return AppResponse::user_registered(query_result.promocode);
 }
 
-pub async fn check(State(repo): State<Arc<Repository>>, body: PromoDto) -> AppResult {
+pub async fn check(State(repo): State<Arc<Repository>>, Dto(body): Dto<PromoDto>) -> AppResult {
 	repo.check_promo(&body.phone, &body.promocode).await?;
 	return AppResponse::promo_valid();
 }
 
-pub async fn activate(State(repo): State<Arc<Repository>>, body: PromoDto) -> AppResult {
+pub async fn activate(State(repo): State<Arc<Repository>>, Dto(body): Dto<PromoDto>) -> AppResult {
 	repo.activate_promo(&body.phone, &body.promocode).await?;
 	return AppResponse::promo_activated();
 }
