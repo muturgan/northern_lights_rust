@@ -5,9 +5,7 @@ use sqlx::{Error as EqlxError, PgPool};
 
 use super::super::Store;
 use crate::{
-	repository::models::{
-		ActivationResult, CheckResult, InsertedPromo, RegisteredUser, RegisteredUserRow,
-	},
+	repository::models::{ActivationResult, CheckResult, InsertedPromo, RegisteredUser},
 	system_models::AppError,
 };
 
@@ -120,7 +118,7 @@ impl Store for PostgresStore {
 	}
 
 	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
-		let users_list = sqlx::query_as::<_, RegisteredUserRow>(
+		let users_list = sqlx::query_as::<_, RegisteredUser>(
 			"SELECT u.*,
 			json_agg(json_build_object('promocode', p.promocode, 'activated_at', p.activated_at)) as promo
 			FROM users u
