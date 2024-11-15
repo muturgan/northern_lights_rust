@@ -16,9 +16,9 @@ pub async fn shutdown_signal(repo: Arc<Repository>) {
 	};
 
 	#[cfg(unix)]
-	let terminate = || async {
-		tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
-			.expect("failed to install signal handler")
+	let sigint = || async {
+		tokio::signal::unix::signal(tokio::signal::unix::SignalKind::interrupt())
+			.expect("failed to install SIGINT signal handler")
 			.recv()
 			.await;
 
@@ -26,10 +26,24 @@ pub async fn shutdown_signal(repo: Arc<Repository>) {
 	};
 
 	#[cfg(not(unix))]
-	let terminate = std::future::pending::<()>();
+	let sigterm = std::future::pending::<()>();
+
+	#[cfg(unix)]
+	let sigterm = || async {
+		tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+			.expect("failed to install SIGTERM signal handler")
+			.recv()
+			.await;
+
+		shutdown_fn().await;
+	};
+
+	#[cfg(not(unix))]
+	let sigterm = std::future::pending::<()>();
 
 	tokio::select! {
 		_ = ctrl_c() => {},
-		_ = terminate() => {},
+		_ = sigint() => {},
+		_ = sigterm() => {},
 	}
 }
