@@ -21,26 +21,18 @@ pub async fn auth(cookie_jar: CookieJar, req: Request<Body>, next: Next) -> Resp
 
 	let cookie_token = cookie_jar.get(cookie_key).map(|cookie| cookie.value());
 
-	let token = if cookie_token.is_some() {
-		cookie_token
-	} else {
+	let token = cookie_token.or_else(|| {
 		req.headers()
 			.get(header::AUTHORIZATION)
-			.and_then(|auth_header| match auth_header.to_str() {
-				Err(_) => None,
-				Ok(val) => Some(val),
-			})
-	};
+			.and_then(|auth_header| auth_header.to_str().ok())
+	});
 
-	match token {
-		None => {
+	if let Some(pass) = token {
+		if pass != config::get_admin_pass() {
 			return AppResponse::from(AppError::unauthorized()).into_response();
 		}
-		Some(pass) => {
-			if pass != config::get_admin_pass() {
-				return AppResponse::from(AppError::unauthorized()).into_response();
-			}
-		}
+	} else {
+		return AppResponse::from(AppError::unauthorized()).into_response();
 	}
 
 	let mut res = next.run(req).await;
