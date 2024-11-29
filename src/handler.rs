@@ -4,7 +4,6 @@ use axum::{
 	http::StatusCode,
 	response::{IntoResponse, Redirect},
 };
-use pad::{Alignment, PadStr};
 use rand::Rng;
 
 use crate::{
@@ -14,9 +13,8 @@ use crate::{
 	system_models::{AppResponse, AppResult},
 };
 
-const MIN_POSTFIX_VALUE: usize = 1;
-const MAX_POSTFIX_VALUE: usize = 999;
-const MAX_POSTFIX_LENGTH: usize = 3;
+const MIN_POSTFIX_VALUE: u16 = 1;
+const MAX_POSTFIX_VALUE: u16 = 999;
 
 pub async fn index_handler() -> Redirect {
 	return Redirect::to("/promo");
@@ -55,11 +53,7 @@ pub async fn users(State(repo): State<Arc<Repository>>) -> AppResult {
 }
 
 fn generate_promo_from_bips() -> String {
-	let mut promocode = generate_bip();
-	promocode.push('-');
-	let postfix = generate_postfix();
-	promocode.push_str(&postfix);
-	return promocode;
+	return format!("{}-{}", generate_bip(), generate_postfix());
 }
 
 fn generate_bip() -> String {
@@ -71,7 +65,5 @@ fn generate_bip() -> String {
 
 fn generate_postfix() -> String {
 	let random_int = rand::thread_rng().gen_range(MIN_POSTFIX_VALUE..MAX_POSTFIX_VALUE);
-	return random_int
-		.to_string()
-		.pad(MAX_POSTFIX_LENGTH, '0', Alignment::Right, true);
+	return format!("{:>03}", random_int);
 }
