@@ -27,12 +27,8 @@ impl AppResponse {
 		};
 	}
 
-	fn scenario_success<S: AsRef<str>>(result: S, payload: Option<serde_json::Value>) -> Self {
-		return Self::new(
-			EScenarioStatus::SCENARIO_SUCCESS,
-			result.as_ref().to_string(),
-			payload,
-		);
+	fn scenario_success<S: Into<String>>(result: S, payload: Option<serde_json::Value>) -> Self {
+		return Self::new(EScenarioStatus::SCENARIO_SUCCESS, result.into(), payload);
 	}
 
 	pub fn unauthorized(result: String, payload: Option<serde_json::Value>) -> Self {
