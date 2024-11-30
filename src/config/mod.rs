@@ -54,16 +54,16 @@ pub fn get_db_max_pool_size() -> u32 {
 }
 
 pub fn get_bips() -> Vec<String> {
-	let cwd = current_dir().unwrap();
-	let cwd = cwd.to_str().unwrap();
+	let cwd = current_dir().expect("can't reed current dir");
+	let cwd = cwd.to_str().expect("can't convert current dir to str");
 	let bips_path = Path::new(cwd).join("bip39_russian.txt");
 
 	let mut bips = Vec::new();
 
-	let file = File::open(bips_path).unwrap();
+	let file = File::open(bips_path).expect("can't open bips file");
 	let reader = BufReader::new(file);
 	for line in reader.lines() {
-		bips.push(line.unwrap());
+		bips.push(line.expect("can't reed line"));
 	}
 
 	return bips;

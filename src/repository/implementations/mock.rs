@@ -88,12 +88,10 @@ impl Store for MockStore {
 	async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
 		let current_store = self.store.read().await;
 
-		let existing_user = current_store.iter().find(|u| u.phone == user_phone);
-		if existing_user.is_none() {
-			return AppError::promo_not_exists().into();
-		}
-
-		let existing_user = existing_user.unwrap();
+		let existing_user = current_store
+			.iter()
+			.find(|u| u.phone == user_phone)
+			.ok_or_else(|| AppError::promo_not_exists())?;
 
 		if existing_user.promocode != promocode {
 			return AppError::promo_not_exists().into();
@@ -110,13 +108,8 @@ impl Store for MockStore {
 
 		let existing_user = current_store
 			.iter_mut()
-			.find(|u| u.phone == user_phone && u.promocode == promocode);
-
-		if existing_user.is_none() {
-			return AppError::promo_not_exists().into();
-		}
-
-		let existing_user = existing_user.unwrap();
+			.find(|u| u.phone == user_phone && u.promocode == promocode)
+			.ok_or_else(|| AppError::promo_not_exists())?;
 
 		if existing_user.activated_at.is_some() {
 			return AppError::promo_already_activated().into();
