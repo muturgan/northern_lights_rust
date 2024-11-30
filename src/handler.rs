@@ -4,6 +4,7 @@ use axum::{
 	http::StatusCode,
 	response::{IntoResponse, Redirect},
 };
+use lazy_static::lazy_static;
 use rand::Rng;
 
 use crate::{
@@ -12,6 +13,10 @@ use crate::{
 	repository::Repository,
 	system_models::{AppResponse, AppResult},
 };
+
+lazy_static! {
+	static ref BIPS: Vec<String> = config::get_bips();
+}
 
 const MIN_POSTFIX_VALUE: u16 = 1;
 const MAX_POSTFIX_VALUE: u16 = 999;
@@ -56,11 +61,9 @@ fn generate_promo_from_bips() -> String {
 	return format!("{}-{}", generate_bip(), generate_postfix());
 }
 
-fn generate_bip() -> String {
-	let bips = config::get_bips();
-	let random_index = rand::thread_rng().gen_range(0..bips.len());
-	let bip = &bips[random_index];
-	return String::from(bip);
+fn generate_bip() -> &'static str {
+	let random_index = rand::thread_rng().gen_range(0..BIPS.len());
+	return &BIPS[random_index];
 }
 
 fn generate_postfix() -> String {
