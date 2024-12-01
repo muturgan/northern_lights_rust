@@ -8,7 +8,7 @@ use implementations::MockStore;
 use implementations::PostgresStore;
 use models::{InsertedPromo, RegisteredUser};
 
-use crate::system_models::AppError;
+use crate::system_models::CoreResult;
 
 trait Store {
 	async fn insert_user_and_grant_promo(
@@ -17,13 +17,13 @@ trait Store {
 		birth_date: NaiveDate,
 		phone: &str,
 		promocode: &str,
-	) -> Result<InsertedPromo, AppError>;
+	) -> CoreResult<InsertedPromo>;
 
-	async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError>;
+	async fn check_promo(&self, user_phone: &str, promocode: &str) -> CoreResult;
 
-	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError>;
+	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> CoreResult;
 
-	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError>;
+	async fn read_users(&self) -> CoreResult<Vec<RegisteredUser>>;
 
 	async fn close(&self);
 }
@@ -54,22 +54,22 @@ impl Repository {
 		birth_date: NaiveDate,
 		phone: &str,
 		promocode: &str,
-	) -> Result<InsertedPromo, AppError> {
+	) -> CoreResult<InsertedPromo> {
 		return self
 			.store
 			.insert_user_and_grant_promo(first_name, birth_date, phone, promocode)
 			.await;
 	}
 
-	pub async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
+	pub async fn check_promo(&self, user_phone: &str, promocode: &str) -> CoreResult {
 		return self.store.check_promo(user_phone, promocode).await;
 	}
 
-	pub async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
+	pub async fn activate_promo(&self, user_phone: &str, promocode: &str) -> CoreResult {
 		return self.store.activate_promo(user_phone, promocode).await;
 	}
 
-	pub async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
+	pub async fn read_users(&self) -> CoreResult<Vec<RegisteredUser>> {
 		return self.store.read_users().await;
 	}
 

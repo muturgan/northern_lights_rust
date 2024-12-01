@@ -7,3 +7,4 @@ pub use response::AppResponse;
 pub use scenario_status::EScenarioStatus;
 
 pub type AppResult = Result<AppResponse, AppError>;
+pub(crate) type CoreResult<T = ()> = Result<T, AppError>;

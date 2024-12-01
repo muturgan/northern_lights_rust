@@ -6,7 +6,7 @@ use sqlx::{Error as EqlxError, PgPool};
 use super::super::Store;
 use crate::{
 	repository::models::{ActivationResult, CheckResult, InsertedPromo, RegisteredUser},
-	system_models::AppError,
+	system_models::{AppError, CoreResult},
 };
 
 impl From<EqlxError> for AppError {
@@ -34,7 +34,7 @@ impl Store for PostgresStore {
 		birth_date: NaiveDate,
 		phone: &str,
 		promocode: &str,
-	) -> Result<InsertedPromo, AppError> {
+	) -> CoreResult<InsertedPromo> {
 		let query_result = sqlx::query_as::<_, InsertedPromo>(
 			"WITH inserted_user AS (
 				INSERT INTO users (firstname,birthdate,phone) VALUES ($1, $2, $3) RETURNING id
@@ -63,7 +63,7 @@ impl Store for PostgresStore {
 		};
 	}
 
-	async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
+	async fn check_promo(&self, user_phone: &str, promocode: &str) -> CoreResult {
 		let mut promos = sqlx::query_as::<_, CheckResult>(
 			"SELECT promocode, phone, activated_at FROM promo P
 			INNER JOIN users U ON P.holder_id = U.ID
@@ -85,7 +85,7 @@ impl Store for PostgresStore {
 		};
 	}
 
-	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
+	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> CoreResult {
 		let mut activation_result = sqlx::query_as::<_, ActivationResult>(
 			"WITH before_update AS (
 			SELECT promocode, holder_id, activated_at FROM promo P
@@ -117,7 +117,7 @@ impl Store for PostgresStore {
 		};
 	}
 
-	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
+	async fn read_users(&self) -> CoreResult<Vec<RegisteredUser>> {
 		let users_list = sqlx::query_as::<_, RegisteredUser>(
 			"SELECT u.*,
 			json_agg(json_build_object('promocode', p.promocode, 'activated_at', p.activated_at)) as promo

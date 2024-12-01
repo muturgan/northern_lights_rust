@@ -5,7 +5,7 @@ use tokio::sync::RwLock;
 use super::super::Store;
 use crate::{
 	repository::models::{InsertedPromo, RegisteredUser, UsersPromo},
-	system_models::AppError,
+	system_models::{AppError, CoreResult},
 };
 
 #[derive(Clone)]
@@ -57,7 +57,7 @@ impl Store for MockStore {
 		birthdate: NaiveDate,
 		phone: &str,
 		promocode: &str,
-	) -> Result<InsertedPromo, AppError> {
+	) -> CoreResult<InsertedPromo> {
 		let mut current_store = self.store.write().await;
 
 		let existing_user = current_store.iter().find(|u| u.phone == phone);
@@ -85,7 +85,7 @@ impl Store for MockStore {
 		});
 	}
 
-	async fn check_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
+	async fn check_promo(&self, user_phone: &str, promocode: &str) -> CoreResult {
 		let current_store = self.store.read().await;
 
 		let existing_user = current_store
@@ -103,7 +103,7 @@ impl Store for MockStore {
 		};
 	}
 
-	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> Result<(), AppError> {
+	async fn activate_promo(&self, user_phone: &str, promocode: &str) -> CoreResult {
 		let mut current_store = self.store.write().await;
 
 		let existing_user = current_store
@@ -120,7 +120,7 @@ impl Store for MockStore {
 		return Ok(());
 	}
 
-	async fn read_users(&self) -> Result<Vec<RegisteredUser>, AppError> {
+	async fn read_users(&self) -> CoreResult<Vec<RegisteredUser>> {
 		let current_store = self.store.read().await;
 		return Ok(current_store.iter().map(|user| user.to_user()).collect());
 	}
