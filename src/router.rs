@@ -19,6 +19,7 @@ pub fn create_router(repo: Arc<Repository>) -> Router {
 			post(H::activate).route_layer(middleware::from_fn(auth)),
 		)
 		.route("/api/users", get(H::users))
+		.route("/api/bips", get(H::read_bips))
 		.route("/", get(H::index_handler))
 		.route("/favicon.ico", get(H::favicon_handler))
 		.nest_service("/promo", ServeFile::new("static/promo.html"))

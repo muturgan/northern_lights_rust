@@ -1,11 +1,14 @@
 use ::std::sync::Arc;
 use axum::{
+	body::Body,
 	extract::State,
-	http::StatusCode,
+	http::{StatusCode, header},
 	response::{IntoResponse, Redirect},
 };
 use lazy_static::lazy_static;
 use rand::Rng;
+use tokio::{fs::File, io::BufReader};
+use tokio_util::io::ReaderStream;
 
 use crate::{
 	config,
@@ -55,6 +58,17 @@ pub async fn activate(State(repo): State<Arc<Repository>>, Dto(body): Dto<PromoD
 pub async fn users(State(repo): State<Arc<Repository>>) -> AppResult {
 	let users = repo.read_users().await?;
 	return AppResponse::user_list(users);
+}
+
+pub async fn read_bips() -> impl IntoResponse {
+	let Ok(file) = File::open(config::get_bips_path()).await else {
+		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+	};
+
+	let stream = ReaderStream::new(BufReader::new(file));
+	let body = Body::from_stream(stream);
+
+	([(header::CONTENT_TYPE, "text/plain")], body).into_response()
 }
 
 fn generate_promo_from_bips() -> String {

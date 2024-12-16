@@ -1,9 +1,9 @@
 use ::std::{
 	env::{current_dir, var as readEnvVar},
 	fs::File,
-	io::{BufReader, prelude::*},
+	io::{BufRead, BufReader},
 	net::SocketAddr,
-	path::Path,
+	path::{Path, PathBuf},
 };
 
 pub fn get_http_host_to_serve() -> SocketAddr {
@@ -53,10 +53,13 @@ pub fn get_db_max_pool_size() -> u32 {
 	);
 }
 
-pub fn get_bips() -> Vec<String> {
+pub fn get_bips_path() -> PathBuf {
 	let cwd = current_dir().expect("can't reed current dir");
-	let cwd = cwd.to_str().expect("can't convert current dir to str");
-	let bips_path = Path::new(cwd).join("bip39_russian.txt");
+	Path::new(&cwd).join("bip39_russian.txt")
+}
+
+pub fn get_bips() -> Vec<String> {
+	let bips_path = get_bips_path();
 
 	let mut bips = Vec::new();
 
