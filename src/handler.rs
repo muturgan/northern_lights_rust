@@ -90,7 +90,7 @@ pub async fn fetch() -> impl IntoResponse {
 	let content_type = res.headers().get(header::CONTENT_TYPE);
 	let content_type = content_type
 		.map(|h| h.to_str().unwrap_or(OCTET_STREAM).to_string())
-		.unwrap_or(OCTET_STREAM.into());
+		.unwrap_or_else(|| OCTET_STREAM.into());
 
 	let body = Body::from_stream(res.bytes_stream());
 
