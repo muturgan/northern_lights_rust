@@ -6,6 +6,11 @@ use ::std::{
 	path::{Path, PathBuf},
 };
 
+#[cfg(feature = "stream")]
+pub fn is_secure() -> bool {
+	readEnvVar("APP_SECURE").unwrap_or_default() == "true"
+}
+
 pub fn get_http_host_to_serve() -> SocketAddr {
 	let app_host = readEnvVar("APP_HOST").expect("APP_HOST environment variable is not defined");
 

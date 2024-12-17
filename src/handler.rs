@@ -1,13 +1,16 @@
 use ::std::sync::Arc;
+#[cfg(feature = "stream")]
+use axum::{body::Body, http::header};
 use axum::{
-	body::Body,
 	extract::State,
-	http::{StatusCode, header},
+	http::StatusCode,
 	response::{IntoResponse, Redirect},
 };
 use lazy_static::lazy_static;
 use rand::Rng;
+#[cfg(feature = "stream")]
 use tokio::{fs::File, io::BufReader};
+#[cfg(feature = "stream")]
 use tokio_util::io::ReaderStream;
 
 use crate::{
@@ -23,6 +26,8 @@ lazy_static! {
 
 const MIN_POSTFIX_VALUE: u16 = 1;
 const MAX_POSTFIX_VALUE: u16 = 999;
+#[cfg(feature = "stream")]
+const OCTET_STREAM: &str = "application/octet-stream";
 
 pub async fn index_handler() -> Redirect {
 	return Redirect::to("/promo");
@@ -60,6 +65,7 @@ pub async fn users(State(repo): State<Arc<Repository>>) -> AppResult {
 	return AppResponse::user_list(users);
 }
 
+#[cfg(feature = "stream")]
 pub async fn read_bips() -> impl IntoResponse {
 	let Ok(file) = File::open(config::get_bips_path()).await else {
 		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
@@ -69,6 +75,26 @@ pub async fn read_bips() -> impl IntoResponse {
 	let body = Body::from_stream(stream);
 
 	([(header::CONTENT_TYPE, "text/plain")], body).into_response()
+}
+
+#[cfg(feature = "stream")]
+pub async fn fetch() -> impl IntoResponse {
+	let secure_postfix = if config::is_secure() { "s" } else { "" };
+	let host = config::get_http_host_to_serve();
+	let url = format!("http{secure_postfix}://{host}/api/bips");
+
+	let Ok(res) = reqwest::get(url).await else {
+		return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+	};
+
+	let content_type = res.headers().get(header::CONTENT_TYPE);
+	let content_type = content_type
+		.map(|h| h.to_str().unwrap_or(OCTET_STREAM).to_string())
+		.unwrap_or(OCTET_STREAM.into());
+
+	let body = Body::from_stream(res.bytes_stream());
+
+	([(header::CONTENT_TYPE, content_type)], body).into_response()
 }
 
 fn generate_promo_from_bips() -> String {
