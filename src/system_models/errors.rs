@@ -57,6 +57,10 @@ impl AppError {
 			None,
 		)
 	}
+
+	pub fn system_error<S: ToString>(msg: S) -> Self {
+		AppError::SystemError(msg.to_string())
+	}
 }
 
 impl IntoResponse for AppError {

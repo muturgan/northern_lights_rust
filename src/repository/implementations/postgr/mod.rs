@@ -11,7 +11,7 @@ use crate::{
 
 impl From<EqlxError> for AppError {
 	fn from(err: EqlxError) -> Self {
-		return AppError::SystemError(err.to_string());
+		return AppError::system_error(err);
 	}
 }
 

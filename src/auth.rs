@@ -44,7 +44,7 @@ pub async fn auth(cookie_jar: CookieJar, req: Request<Body>, next: Next) -> Resp
 			config::get_admin_pass()
 		);
 		match HeaderValue::from_str(&auth_cookie) {
-			Err(_) => return AppError::SystemError("Ошиюка установки cookie".into()).into_response(),
+			Err(_) => return AppError::system_error("Ошиюка установки cookie").into_response(),
 			Ok(cookie_val) => {
 				res.headers_mut().append(header::SET_COOKIE, cookie_val);
 			}

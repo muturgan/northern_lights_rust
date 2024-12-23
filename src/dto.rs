@@ -141,9 +141,9 @@ fn handle_json_rejection(err: JsonRejection) -> AppError {
 		),
 
 		JsonRejection::BytesRejection(_) => {
-			AppError::SystemError(String::from("Не удалось прочитать тело запроса"))
+			AppError::system_error("Не удалось прочитать тело запроса")
 		}
 
-		non_exhaustive => AppError::SystemError(non_exhaustive.to_string()),
+		non_exhaustive => AppError::system_error(non_exhaustive),
 	};
 }
