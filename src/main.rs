@@ -1,8 +1,8 @@
-use ::std::{error::Error, sync::Arc};
+use ::std::{io::Error as IoError, sync::Arc};
 use promo_codes::{config, graceful_shutdown::shutdown_signal, repository::Repository, router};
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<(), IoError> {
 	let repo = Repository::new().await;
 	let repo = Arc::new(repo);
 	let app = router::create_router(repo.clone());
@@ -14,7 +14,5 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 	axum::serve(listener, app)
 		.with_graceful_shutdown(shutdown_signal(repo))
-		.await?;
-
-	Ok(())
+		.await
 }
