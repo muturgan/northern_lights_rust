@@ -1,6 +1,6 @@
 use ::std::error::Error;
 use axum::{
-	Json, RequestExt, async_trait,
+	Json, RequestExt,
 	extract::{FromRequest, Request, rejection::JsonRejection},
 };
 use chrono::NaiveDate;
@@ -104,7 +104,6 @@ impl<'de> Deserialize<'de> for PromoDto {
 
 pub struct Dto<T>(pub T);
 
-#[async_trait]
 impl<T, S> FromRequest<S> for Dto<T>
 where
 	T: 'static + DeserializeOwned,
