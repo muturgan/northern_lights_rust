@@ -9,3 +9,7 @@ A port of my old freelance project for rust learning
 - run the application with the **./scripts.sh dev** (make sure you have **rust** installed, this application was tested on **1.80** rust version)
 - open a browser on a **{APP_HOST}:{APP_PORT}** page to get a promo code as user
 - open a browser on a **{APP_HOST}:{APP_PORT}/check** page to check and activate this promo as seller
+
+## git hooks
+remove a `target` directory (if exists) and run `cargo test` to enable git hooks.  
+repeat it again to enable some changes in your hook files.
