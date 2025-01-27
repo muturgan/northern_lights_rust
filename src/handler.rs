@@ -102,11 +102,11 @@ fn generate_promo_from_bips() -> String {
 }
 
 fn generate_bip() -> &'static str {
-	let random_index = rand::thread_rng().gen_range(0..BIPS.len());
+	let random_index = rand::rng().random_range(0..BIPS.len());
 	return &BIPS[random_index];
 }
 
 fn generate_postfix() -> String {
-	let random_int = rand::thread_rng().gen_range(MIN_POSTFIX_VALUE..MAX_POSTFIX_VALUE);
+	let random_int = rand::rng().random_range(MIN_POSTFIX_VALUE..MAX_POSTFIX_VALUE);
 	return format!("{:>03}", random_int);
 }
