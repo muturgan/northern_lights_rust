@@ -1,10 +1,9 @@
-use ::std::error::Error;
+use ::std::{error::Error, sync::LazyLock};
 use axum::{
 	Json, RequestExt,
 	extract::{FromRequest, Request, rejection::JsonRejection},
 };
 use chrono::NaiveDate;
-use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{
 	Deserialize, Deserializer,
@@ -13,14 +12,17 @@ use serde::{
 
 use crate::system_models::AppError;
 
-lazy_static! {
-	static ref RE_PHONE: Regex =
-		Regex::new(r"^(\+79)[0-9]{9}$").expect("Phone regex should build without errors");
-	static ref RE_PROMO: Regex =
-		Regex::new(r"^[а-я]{4,8}-[0-9]{3}$").expect("Promo regex should build without errors");
-	static ref RE_DATE: Regex =
-		Regex::new(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$").expect("Date regex should build without errors");
-}
+static RE_PHONE: LazyLock<Regex> = LazyLock::new(|| {
+	Regex::new(r"^(\+79)[0-9]{9}$").expect("Phone regex should build without errors")
+});
+
+static RE_PROMO: LazyLock<Regex> = LazyLock::new(|| {
+	Regex::new(r"^[а-я]{4,8}-[0-9]{3}$").expect("Promo regex should build without errors")
+});
+
+static RE_DATE: LazyLock<Regex> = LazyLock::new(|| {
+	Regex::new(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$").expect("Date regex should build without errors")
+});
 
 #[derive(Debug)]
 pub struct RegistrationDto {

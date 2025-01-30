@@ -1,4 +1,4 @@
-use ::std::sync::Arc;
+use ::std::sync::{Arc, LazyLock};
 #[cfg(feature = "stream")]
 use axum::{body::Body, http::header};
 use axum::{
@@ -6,7 +6,6 @@ use axum::{
 	http::StatusCode,
 	response::{IntoResponse, Redirect},
 };
-use lazy_static::lazy_static;
 use rand::Rng;
 #[cfg(feature = "stream")]
 use tokio::{fs::File, io::BufReader};
@@ -20,9 +19,7 @@ use crate::{
 	system_models::{AppResponse, AppResult},
 };
 
-lazy_static! {
-	static ref BIPS: Vec<String> = config::get_bips();
-}
+static BIPS: LazyLock<Vec<String>> = LazyLock::new(|| config::get_bips());
 
 const MIN_POSTFIX_VALUE: u16 = 1;
 const MAX_POSTFIX_VALUE: u16 = 999;
