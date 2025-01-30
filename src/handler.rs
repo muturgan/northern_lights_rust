@@ -19,7 +19,7 @@ use crate::{
 	system_models::{AppResponse, AppResult},
 };
 
-static BIPS: LazyLock<Vec<String>> = LazyLock::new(|| config::get_bips());
+static BIPS: LazyLock<Vec<String>> = LazyLock::new(config::get_bips);
 
 const MIN_POSTFIX_VALUE: u16 = 1;
 const MAX_POSTFIX_VALUE: u16 = 999;

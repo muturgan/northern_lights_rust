@@ -15,11 +15,9 @@ use crate::system_models::AppError;
 static RE_PHONE: LazyLock<Regex> = LazyLock::new(|| {
 	Regex::new(r"^(\+79)[0-9]{9}$").expect("Phone regex should build without errors")
 });
-
 static RE_PROMO: LazyLock<Regex> = LazyLock::new(|| {
 	Regex::new(r"^[а-я]{4,8}-[0-9]{3}$").expect("Promo regex should build without errors")
 });
-
 static RE_DATE: LazyLock<Regex> = LazyLock::new(|| {
 	Regex::new(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$").expect("Date regex should build without errors")
 });
