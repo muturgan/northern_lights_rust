@@ -47,7 +47,7 @@ pub async fn registration(
 		.insert_user_and_grant_promo(&body.first_name, body.birth_date, &body.phone, &promocode)
 		.await?;
 
-	return AppResponse::user_registered(query_result.promocode);
+	return AppResponse::user_registered(&query_result.promocode);
 }
 
 pub async fn check(State(repo): State<Arc<Repository>>, Dto(body): Dto<PromoDto>) -> AppResult {
@@ -62,7 +62,7 @@ pub async fn activate(State(repo): State<Arc<Repository>>, Dto(body): Dto<PromoD
 
 pub async fn users(State(repo): State<Arc<Repository>>) -> AppResult {
 	let users = repo.read_users().await?;
-	return AppResponse::user_list(users);
+	return AppResponse::user_list(&users);
 }
 
 #[cfg(feature = "stream")]

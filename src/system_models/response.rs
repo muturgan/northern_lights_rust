@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use super::AppResult;
 use crate::{
-	repository::models,
+	repository::models::RegisteredUser,
 	system_models::{errors::AppError, scenario_status::EScenarioStatus},
 };
 
@@ -19,7 +19,11 @@ pub struct AppResponse {
 }
 
 impl AppResponse {
-	fn new(status: EScenarioStatus, result: String, payload: Option<serde_json::Value>) -> Self {
+	const fn new(
+		status: EScenarioStatus,
+		result: String,
+		payload: Option<serde_json::Value>,
+	) -> Self {
 		return Self {
 			status,
 			result,
@@ -49,7 +53,7 @@ impl AppResponse {
 	//  *                               *
 	//  *********************************
 
-	pub fn user_registered(promocode: String) -> AppResult {
+	pub fn user_registered(promocode: &str) -> AppResult {
 		let upper = promocode.to_uppercase();
 		return Ok(Self::scenario_success(
 			format!("Новый пользователь успешно зарегистрирован. Промокод: {upper}"),
@@ -65,7 +69,7 @@ impl AppResponse {
 		return Ok(Self::scenario_success("Промокод успешно активирован", None));
 	}
 
-	pub fn user_list(users: Vec<models::RegisteredUser>) -> AppResult {
+	pub fn user_list(users: &[RegisteredUser]) -> AppResult {
 		let payload = serde_json::json!(users);
 		return Ok(Self::scenario_success(
 			"Список пользователей",

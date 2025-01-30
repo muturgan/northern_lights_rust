@@ -5,7 +5,7 @@ use axum::{
 	middleware::Next,
 	response::{IntoResponse, Response},
 };
-use axum_extra::extract::cookie::CookieJar;
+use axum_extra::extract::cookie::{Cookie, CookieJar};
 
 use crate::{
 	config,
@@ -19,7 +19,7 @@ pub async fn auth(cookie_jar: CookieJar, req: Request<Body>, next: Next) -> Resp
 		"__Secure-authorization"
 	};
 
-	let cookie_token = cookie_jar.get(cookie_key).map(|cookie| cookie.value());
+	let cookie_token = cookie_jar.get(cookie_key).map(Cookie::value);
 
 	let token = cookie_token.or_else(|| {
 		req.headers()
