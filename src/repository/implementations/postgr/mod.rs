@@ -129,7 +129,7 @@ impl Store for PostgresStore {
 		.fetch_all(&self.pool)
 		.await?;
 
-		return Ok(users_list.into_iter().map(RegisteredUser::from).collect());
+		return Ok(users_list);
 	}
 
 	async fn close(&self) {
